@@ -1,0 +1,201 @@
+/* =========================
+   DESIGN TOKENS (BRAND)
+========================= */
+
+:root {
+  --brand: #16a34a;
+  --brand-dark: #15803d;
+  --bg: #f7f7f7;
+  --card-bg: #ffffff;
+  --text-main: #1c1c1c;
+  --text-muted: #6b7280;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --shadow-soft: 0 6px 24px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 14px 36px rgba(0, 0, 0, 0.14);
+}
+
+/* =========================
+   GLOBAL BASE
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Roboto", system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================
+   HEADER / BRAND
+========================= */
+
+.logo {
+  height: 48px;
+  transition: transform 0.25s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   HERO (PREMIUM FEEL)
+========================= */
+
+.hero {
+  position: relative;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.75)
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 44px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  margin-top: 8px;
+  font-size: 18px;
+  color: #e5e7eb;
+}
+
+/* =========================
+   CATEGORY BAR
+========================= */
+
+.category-chip {
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px !important;
+  transition: all 0.2s ease;
+}
+
+.category-chip:hover {
+  transform: translateY(-1px);
+}
+
+/* =========================
+   FOOD CARDS (CORE UX)
+========================= */
+
+.food-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.food-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+}
+
+.food-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.food-price {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* =========================
+   PRIMARY BUTTON
+========================= */
+
+.primary-btn {
+  margin-top: 12px !important;
+  background: var(--brand) !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-md) !important;
+  text-transform: none !important;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: var(--brand-dark) !important;
+  transform: scale(1.03);
+}
+
+/* =========================
+   CART BAR (PREMIUM CTA)
+========================= */
+
+.sticky-cart {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--brand);
+  color: #ffffff;
+  padding: 16px 22px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   MOBILE POLISH
+========================= */
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 30px;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+  }
+
+  .logo {
+    height: 40px;
+  }
+}
