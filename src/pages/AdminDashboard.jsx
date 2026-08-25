@@ -5,57 +5,41 @@ import {
   Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   Drawer,
-  Grid,
   IconButton,
-  InputAdornment,
-  MenuItem,
   Paper,
-  Select,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 
 import {
-  DashboardRounded,
-  RestaurantMenuRounded,
-  ReceiptLongRounded,
+  AccessTimeRounded,
   AnalyticsRounded,
-  PeopleRounded,
-  SettingsRounded,
+  DashboardRounded,
+  LocalFireDepartmentRounded,
   LogoutRounded,
   MenuRounded,
-  AddRounded,
-  EditRounded,
-  DeleteOutlineRounded,
-  SearchRounded,
-  TrendingUpRounded,
-  ShoppingBagRounded,
-  AccessTimeRounded,
-  CheckCircleRounded,
-  LocalFireDepartmentRounded,
-  CloseRounded,
   MoreHorizRounded,
+  PeopleRounded,
+  ReceiptLongRounded,
+  RefreshRounded,
+  RestaurantMenuRounded,
+  SettingsRounded,
+  ShoppingBagRounded,
+  TrendingUpRounded,
+  ArrowForwardRounded,
+  CheckCircleRounded,
+  CancelRounded,
+  NotificationsNoneRounded,
+  AddRounded,
 } from "@mui/icons-material";
 
 import { useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 import {
   menuService,
@@ -63,21 +47,12 @@ import {
   authService,
 } from "../services/api";
 
-import { useNavigate } from "react-router-dom";
+import AdminMenu from "./AdminMenu";
+import AdminOrders from "./AdminOrders";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const drawerWidth = 250;
 
-const initialForm = {
-  name: "",
-  category: "",
-  priceHalf: "",
-  priceFull: "",
-  image: "",
-};
 
 /* =========================================================
    SIDEBAR ITEM
@@ -88,38 +63,63 @@ function SidebarItem({
   label,
   active,
   onClick,
+  badge,
 }) {
   return (
     <Button
       fullWidth
       onClick={onClick}
       startIcon={icon}
+      endIcon={
+        badge ? (
+          <Box
+            sx={{
+              minWidth: 20,
+              height: 20,
+              px: 0.7,
+              borderRadius: "20px",
+              display: "grid",
+              placeItems: "center",
+              background: active
+                ? "rgba(255,255,255,.16)"
+                : "#3f2024",
+              color: active
+                ? "#ffffff"
+                : "#f87171",
+              fontSize: 10,
+              fontWeight: 900,
+            }}
+          >
+            {badge}
+          </Box>
+        ) : null
+      }
       sx={{
         justifyContent: "flex-start",
-        px: 1.7,
-        py: 1.25,
-        mb: 0.5,
-        borderRadius: "12px",
+        px: 1.6,
+        py: 1.15,
+        mb: 0.6,
+        borderRadius: "11px",
         textTransform: "none",
-        fontWeight: active ? 800 : 650,
-        fontSize: 14,
+        fontWeight: active ? 850 : 650,
+        fontSize: 13,
         color: active
           ? "#ffffff"
-          : "#94a3b8",
+          : "#a1a1aa",
         background: active
-          ? "linear-gradient(135deg,#0f766e,#0e7490)"
+          ? "linear-gradient(135deg,#123c16,#0c2a10)"
           : "transparent",
 
         "& .MuiButton-startIcon": {
           color: active
-            ? "#ffffff"
-            : "#64748b",
+            ? "#22c55e"
+            : "#8b8f8b",
         },
 
         "&:hover": {
           background: active
-            ? "linear-gradient(135deg,#0f766e,#0e7490)"
-            : "rgba(255,255,255,.06)",
+            ? "linear-gradient(135deg,#123c16,#0c2a10)"
+            : "#1b1d1c",
           color: "#ffffff",
         },
       }}
@@ -129,115 +129,30 @@ function SidebarItem({
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  iconBg,
-}) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        height: "100%",
-        borderRadius: "18px",
-        border:
-          "1px solid #e2e8f0",
-        background: "#ffffff",
-        boxShadow:
-          "0 8px 25px rgba(15,23,42,.055)",
-      }}
-    >
-      <CardContent sx={{ p: 2.2 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-        >
-          <Box>
-            <Typography
-              sx={{
-                color: "#64748b",
-                fontSize: 12,
-                fontWeight: 750,
-              }}
-            >
-              {title}
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 0.6,
-                color: "#0f172a",
-                fontSize: 27,
-                fontWeight: 950,
-                lineHeight: 1.1,
-              }}
-            >
-              {value}
-            </Typography>
-
-            {subtitle && (
-              <Typography
-                sx={{
-                  mt: 0.7,
-                  color: "#94a3b8",
-                  fontSize: 11.5,
-                }}
-              >
-                {subtitle}
-              </Typography>
-            )}
-          </Box>
-
-          <Box
-            sx={{
-              width: 46,
-              height: 46,
-              borderRadius: "14px",
-              display: "grid",
-              placeItems: "center",
-              background: iconBg,
-            }}
-          >
-            {icon}
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
 
 /* =========================================================
    STATUS CHIP
 ========================================================= */
 
 function StatusChip({ status }) {
-  const normalized =
-    String(status || "")
-      .toLowerCase();
+  const normalized = String(
+    status || ""
+  ).toLowerCase();
 
-  let background = "#f1f5f9";
-  let color = "#475569";
+  let background = "#272a28";
+  let color = "#d1d5db";
 
-  if (
-    normalized === "pending"
-  ) {
-    background = "#fef3c7";
-    color = "#92400e";
+  if (normalized === "pending") {
+    background = "#33280d";
+    color = "#fbbf24";
   }
 
   if (
     normalized === "cooking" ||
     normalized === "preparing"
   ) {
-    background = "#dbeafe";
-    color = "#1d4ed8";
+    background = "#182b42";
+    color = "#60a5fa";
   }
 
   if (
@@ -245,15 +160,13 @@ function StatusChip({ status }) {
     normalized === "completed" ||
     normalized === "ready"
   ) {
-    background = "#dcfce7";
-    color = "#166534";
+    background = "#102d18";
+    color = "#4ade80";
   }
 
-  if (
-    normalized === "cancelled"
-  ) {
-    background = "#fee2e2";
-    color = "#991b1b";
+  if (normalized === "cancelled") {
+    background = "#351719";
+    color = "#f87171";
   }
 
   return (
@@ -261,19 +174,75 @@ function StatusChip({ status }) {
       label={status || "Unknown"}
       size="small"
       sx={{
-        borderRadius: "8px",
+        height: 25,
+        borderRadius: "7px",
         background,
         color,
         fontWeight: 850,
-        fontSize: 11,
-        border: "none",
+        fontSize: 10.5,
+        border: "1px solid rgba(255,255,255,.04)",
       }}
     />
   );
 }
 
+
 /* =========================================================
-   MAIN ADMIN DASHBOARD
+   SUMMARY ITEM
+========================================================= */
+
+function SummaryItem({
+  label,
+  value,
+  color = "#f4f4f5",
+  icon,
+}) {
+  return (
+    <Box
+      sx={{
+        minWidth: 0,
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={0.7}
+        alignItems="center"
+        sx={{ mb: 0.8 }}
+      >
+        {icon}
+
+        <Typography
+          sx={{
+            color: "#8f9691",
+            fontSize: 11,
+            fontWeight: 750,
+          }}
+        >
+          {label}
+        </Typography>
+      </Stack>
+
+      <Typography
+        sx={{
+          color,
+          fontSize: {
+            xs: 25,
+            md: 29,
+          },
+          fontWeight: 950,
+          lineHeight: 1,
+          letterSpacing: "-0.5px",
+        }}
+      >
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+
+/* =========================================================
+   DASHBOARD
 ========================================================= */
 
 export default function AdminDashboard() {
@@ -284,10 +253,6 @@ export default function AdminDashboard() {
   );
 
   const navigate = useNavigate();
-
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [activePage, setActivePage] =
     useState("dashboard");
@@ -300,23 +265,6 @@ export default function AdminDashboard() {
 
   const [orders, setOrders] =
     useState([]);
-
-  const [
-    openItemDialog,
-    setOpenItemDialog,
-  ] = useState(false);
-
-  const [editingItem, setEditingItem] =
-    useState(null);
-
-  const [formData, setFormData] =
-    useState(initialForm);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [categoryFilter, setCategoryFilter] =
-    useState("All");
 
   const [loading, setLoading] =
     useState(true);
@@ -358,7 +306,7 @@ export default function AdminDashboard() {
       console.error(err);
 
       if (
-        err.response?.status === 401
+        err?.response?.status === 401
       ) {
         navigate("/login");
         return;
@@ -372,6 +320,7 @@ export default function AdminDashboard() {
     }
   };
 
+
   /* =======================================================
      LOGOUT
   ======================================================= */
@@ -381,240 +330,153 @@ export default function AdminDashboard() {
     navigate("/login");
   };
 
+
   /* =======================================================
-     ORDER STATUS
+     TODAY
   ======================================================= */
 
-  const handleStatusUpdate = async (
-    id,
-    status
-  ) => {
-    try {
-      await orderService.updateStatus(
-        id,
-        status
+  const todayOrders = useMemo(() => {
+    const now = new Date();
+
+    return orders.filter((order) => {
+      if (!order.createdAt) {
+        return false;
+      }
+
+      const date = new Date(
+        order.createdAt
       );
 
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-
-      setError(
-        "Unable to update order status."
+      return (
+        date.getDate() ===
+          now.getDate() &&
+        date.getMonth() ===
+          now.getMonth() &&
+        date.getFullYear() ===
+          now.getFullYear()
       );
-    }
-  };
-
-  /* =======================================================
-     OPEN ADD ITEM
-  ======================================================= */
-
-  const openAddItem = () => {
-    setEditingItem(null);
-    setFormData(initialForm);
-    setOpenItemDialog(true);
-  };
-
-  /* =======================================================
-     OPEN EDIT ITEM
-  ======================================================= */
-
-  const openEditItem = (item) => {
-    setEditingItem(item);
-
-    setFormData({
-      name: item.name || "",
-      category: item.category || "",
-      priceHalf:
-        item.priceHalf ?? "",
-      priceFull:
-        item.priceFull ?? "",
-      image: item.image || "",
     });
+  }, [orders]);
 
-    setOpenItemDialog(true);
-  };
-
-  /* =======================================================
-     SAVE ITEM
-  ======================================================= */
-
-  const handleSaveItem = async () => {
-    try {
-      if (!formData.name.trim()) {
-        setError(
-          "Please enter a dish name."
-        );
-        return;
-      }
-
-      if (!formData.category.trim()) {
-        setError(
-          "Please enter a category."
-        );
-        return;
-      }
-
-      if (editingItem) {
-        await menuService.updateItem(
-          editingItem.id,
-          formData
-        );
-      } else {
-        await menuService.createItem(
-          formData
-        );
-      }
-
-      setOpenItemDialog(false);
-      setEditingItem(null);
-      setFormData(initialForm);
-      setError("");
-
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-
-      setError(
-        "Unable to save menu item."
-      );
-    }
-  };
 
   /* =======================================================
-     DELETE ITEM
+     TODAY STATS
   ======================================================= */
 
-  const handleDeleteItem = async (
-    id
-  ) => {
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to delete this dish?"
-      );
-
-    if (!confirmed) return;
-
-    try {
-      await menuService.deleteItem(
-        id
-      );
-
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-
-      setError(
-        "Unable to delete menu item."
-      );
-    }
-  };
-
-  /* =======================================================
-     FILTERED MENU
-  ======================================================= */
-
-  const categories = useMemo(() => {
-    const values = [
-      ...new Set(
-        menuItems
-          .map(
-            (item) =>
-              item.category
-          )
-          .filter(Boolean)
-      ),
-    ];
-
-    return [
-      "All",
-      ...values,
-    ];
-  }, [menuItems]);
-
-  const filteredMenu =
-    useMemo(() => {
-      const query =
-        search
-          .trim()
-          .toLowerCase();
-
-      return menuItems.filter(
-        (item) => {
-          const categoryMatch =
-            categoryFilter ===
-            "All" ||
-            item.category ===
-              categoryFilter;
-
-          const searchMatch =
-            !query ||
-            String(
-              item.name || ""
-            )
-              .toLowerCase()
-              .includes(query);
-
-          return (
-            categoryMatch &&
-            searchMatch
-          );
-        }
-      );
-    }, [
-      menuItems,
-      search,
-      categoryFilter,
-    ]);
-
-  /* =======================================================
-     ORDER STATS
-  ======================================================= */
-
-  const pendingOrders =
-    orders.filter(
-      (order) =>
-        String(
-          order.status || ""
-        ).toLowerCase() ===
-        "pending"
-    ).length;
-
-  const cookingOrders =
-    orders.filter(
-      (order) =>
-        ["cooking", "preparing"].includes(
+  const todayStats = useMemo(() => {
+    const pending =
+      todayOrders.filter(
+        (order) =>
           String(
             order.status || ""
-          ).toLowerCase()
-        )
-    ).length;
+          ).toLowerCase() ===
+          "pending"
+      ).length;
 
-  const completedOrders =
-    orders.filter(
-      (order) =>
+    const cooking =
+      todayOrders.filter((order) =>
         [
-          "delivered",
-          "completed",
+          "cooking",
+          "preparing",
         ].includes(
           String(
             order.status || ""
           ).toLowerCase()
         )
-    ).length;
+      ).length;
 
-  const revenue =
-    orders.reduce(
-      (sum, order) =>
-        sum +
-        Number(
-          order.totalAmount || 0
-        ),
-      0
-    );
+    const delivered =
+      todayOrders.filter((order) =>
+        [
+          "delivered",
+          "completed",
+          "ready",
+        ].includes(
+          String(
+            order.status || ""
+          ).toLowerCase()
+        )
+      ).length;
+
+    const cancelled =
+      todayOrders.filter(
+        (order) =>
+          String(
+            order.status || ""
+          ).toLowerCase() ===
+          "cancelled"
+      ).length;
+
+    const revenue =
+      todayOrders
+        .filter(
+          (order) =>
+            String(
+              order.status || ""
+            ).toLowerCase() !==
+            "cancelled"
+        )
+        .reduce(
+          (sum, order) =>
+            sum +
+            Number(
+              order.totalAmount || 0
+            ),
+          0
+        );
+
+    return {
+      pending,
+      cooking,
+      delivered,
+      cancelled,
+      revenue,
+    };
+  }, [todayOrders]);
+
 
   /* =======================================================
-     SIDEBAR
+     TOP DISHES
+  ======================================================= */
+
+  const topDishes = useMemo(() => {
+    const dishMap = {};
+
+    todayOrders.forEach(
+      (order) => {
+        (order.items || []).forEach(
+          (item) => {
+            const name =
+              item.name ||
+              "Unknown Dish";
+
+            const qty = Number(
+              item.qty || 0
+            );
+
+            if (!dishMap[name]) {
+              dishMap[name] = 0;
+            }
+
+            dishMap[name] += qty;
+          }
+        );
+      }
+    );
+
+    return Object.entries(
+      dishMap
+    )
+      .sort(
+        (a, b) =>
+          b[1] - a[1]
+      )
+      .slice(0, 4);
+  }, [todayOrders]);
+
+
+  /* =======================================================
+     NAVIGATION
   ======================================================= */
 
   const navigation = [
@@ -626,14 +488,16 @@ export default function AdminDashboard() {
     {
       key: "menu",
       label: "Menu Management",
-      icon: (
-        <RestaurantMenuRounded />
-      ),
+      icon: <RestaurantMenuRounded />,
     },
     {
       key: "orders",
       label: "Orders",
       icon: <ReceiptLongRounded />,
+      badge:
+        todayStats.pending > 0
+          ? todayStats.pending
+          : null,
     },
     {
       key: "analytics",
@@ -652,6 +516,7 @@ export default function AdminDashboard() {
     },
   ];
 
+
   const handleNavigation = (
     page
   ) => {
@@ -662,9 +527,10 @@ export default function AdminDashboard() {
     }
   };
 
-  /* =======================================================
-     SIDEBAR CONTENT
-  ======================================================= */
+
+  /* =========================================================
+     SIDEBAR
+  ========================================================= */
 
   const sidebarContent = (
     <Box
@@ -673,34 +539,36 @@ export default function AdminDashboard() {
         display: "flex",
         flexDirection: "column",
         background:
-          "linear-gradient(180deg,#0b1220 0%,#0f172a 100%)",
-        color: "#fff",
+          "linear-gradient(180deg,#101211 0%,#0d0f0e 100%)",
+        color: "#ffffff",
       }}
     >
+
       {/* BRAND */}
 
       <Box
         sx={{
-          px: 2.3,
-          py: 2.5,
+          px: 2.2,
+          py: 2.4,
         }}
       >
         <Stack
           direction="row"
-          spacing={1.3}
+          spacing={1.2}
           alignItems="center"
         >
           <Box
             sx={{
-              width: 42,
-              height: 42,
-              borderRadius: "13px",
+              width: 40,
+              height: 40,
+              borderRadius: "12px",
               display: "grid",
               placeItems: "center",
               background:
-                "linear-gradient(135deg,#14b8a6,#0f766e)",
+                "linear-gradient(135deg,#0d6419,#0b4312)",
+              color: "#22c55e",
               boxShadow:
-                "0 8px 20px rgba(20,184,166,.25)",
+                "0 8px 24px rgba(34,197,94,.12)",
             }}
           >
             <RestaurantMenuRounded />
@@ -709,7 +577,7 @@ export default function AdminDashboard() {
           <Box>
             <Typography
               sx={{
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: 950,
                 lineHeight: 1.1,
               }}
@@ -720,9 +588,10 @@ export default function AdminDashboard() {
             <Typography
               sx={{
                 mt: 0.3,
-                color: "#64748b",
-                fontSize: 10,
-                fontWeight: 750,
+                color: "#676d69",
+                fontSize: 9.5,
+                fontWeight: 800,
+                letterSpacing: ".08em",
               }}
             >
               RESTAURANT ADMIN
@@ -731,18 +600,20 @@ export default function AdminDashboard() {
         </Stack>
       </Box>
 
+
       <Divider
         sx={{
           borderColor:
-            "rgba(255,255,255,.07)",
+            "rgba(255,255,255,.06)",
         }}
       />
 
-      {/* NAVIGATION */}
+
+      {/* MENU */}
 
       <Box
         sx={{
-          px: 1.2,
+          px: 1.1,
           py: 2,
           flexGrow: 1,
         }}
@@ -751,10 +622,10 @@ export default function AdminDashboard() {
           sx={{
             px: 1.5,
             mb: 1,
-            color: "#475569",
-            fontSize: 10,
+            color: "#535955",
+            fontSize: 9,
             fontWeight: 900,
-            letterSpacing: ".08em",
+            letterSpacing: ".1em",
           }}
         >
           MAIN MENU
@@ -770,6 +641,9 @@ export default function AdminDashboard() {
                 activePage ===
                 item.key
               }
+              badge={
+                item.badge
+              }
               onClick={() =>
                 handleNavigation(
                   item.key
@@ -780,506 +654,435 @@ export default function AdminDashboard() {
         )}
       </Box>
 
+
       {/* LOGOUT */}
 
       <Box
         sx={{
-          px: 1.2,
+          px: 1.1,
           pb: 2,
         }}
       >
         <Divider
           sx={{
-            mb: 1.5,
+            mb: 1.2,
             borderColor:
-              "rgba(255,255,255,.07)",
+              "rgba(255,255,255,.06)",
           }}
         />
 
         <SidebarItem
           icon={<LogoutRounded />}
           label="Logout"
-          onClick={handleLogout}
+          onClick={
+            handleLogout
+          }
         />
       </Box>
+
     </Box>
   );
 
-  /* =======================================================
+
+  /* =========================================================
      DASHBOARD VIEW
-  ======================================================= */
+  ========================================================= */
 
   const dashboardView = (
-    <>
-      <Box sx={{ mb: 3 }}>
-        <Typography
-          sx={{
-            fontSize: {
-              xs: 25,
-              md: 31,
-            },
-            fontWeight: 950,
-            color: "#0f172a",
-            letterSpacing:
-              "-.03em",
-          }}
-        >
-          Good evening, Admin 👋
-        </Typography>
+    <Box
+      sx={{
+        background:
+          "linear-gradient(135deg,#111312 0%,#151817 45%,#101211 100%)",
+        border:
+          "1px solid #252a27",
+        borderRadius: "20px",
+        color: "#f8fafc",
+        p: {
+          xs: 2,
+          sm: 2.5,
+          md: 3.5,
+        },
+      }}
+    >
 
-        <Typography
-          sx={{
-            mt: 0.5,
-            color: "#64748b",
-            fontSize: 14,
-          }}
+      {/* HEADER */}
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: {
+            xs: "flex-start",
+            md: "center",
+          },
+          flexDirection: {
+            xs: "column",
+            md: "row",
+          },
+          gap: 2,
+          mb: 4,
+        }}
+      >
+
+        <Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ mb: 0.8 }}
+          >
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background:
+                  "#22c55e",
+                boxShadow:
+                  "0 0 12px rgba(34,197,94,.8)",
+              }}
+            />
+
+            <Typography
+              sx={{
+                color: "#22c55e",
+                fontSize: 10,
+                fontWeight: 850,
+              }}
+            >
+              LIVE
+            </Typography>
+          </Stack>
+
+          <Typography
+            sx={{
+              fontSize: {
+                xs: 28,
+                md: 34,
+              },
+              fontWeight: 950,
+              letterSpacing:
+                "-1px",
+              lineHeight: 1,
+            }}
+          >
+            Dashboard
+          </Typography>
+
+          <Typography
+            sx={{
+              mt: 0.8,
+              color: "#858c87",
+              fontSize: 13,
+            }}
+          >
+            Here's what's happening
+            at Famous Cook today.
+          </Typography>
+        </Box>
+
+
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
         >
-          Here's what's happening
-          at Famous Cook today.
-        </Typography>
+
+          <IconButton
+            sx={{
+              width: 40,
+              height: 40,
+              color: "#8d938f",
+              border:
+                "1px solid #292e2b",
+              background: "#171a18",
+            }}
+          >
+            <NotificationsNoneRounded
+              fontSize="small"
+            />
+          </IconButton>
+
+
+          <Button
+            variant="outlined"
+            startIcon={
+              <RefreshRounded />
+            }
+            onClick={fetchData}
+            sx={{
+              borderRadius: "10px",
+              textTransform:
+                "none",
+              fontWeight: 800,
+              color: "#c7cbc8",
+              borderColor:
+                "#333936",
+              background:
+                "#171a18",
+
+              "&:hover": {
+                borderColor:
+                  "#22c55e",
+                color: "#22c55e",
+                background:
+                  "#142017",
+              },
+            }}
+          >
+            Refresh
+          </Button>
+
+        </Stack>
       </Box>
 
-      {/* STATS */}
+
+      {/* =================================================
+          SUMMARY
+      ================================================= */}
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(2,1fr)",
+            md: "repeat(4,1fr)",
+          },
+          gap: {
+            xs: 2.5,
+            md: 4,
+          },
+          px: {
+            xs: 0.5,
+            md: 1,
+          },
+          mb: 4,
+        }}
+      >
+
+        <SummaryItem
+          label="Today's orders"
+          value={
+            todayOrders.length
+          }
+          icon={
+            <ShoppingBagRounded
+              sx={{
+                fontSize: 14,
+                color:
+                  "#6f7772",
+              }}
+            />
+          }
+        />
+
+        <SummaryItem
+          label="Pending"
+          value={
+            todayStats.pending
+          }
+          color="#fbbf24"
+          icon={
+            <AccessTimeRounded
+              sx={{
+                fontSize: 14,
+                color:
+                  "#6f7772",
+              }}
+            />
+          }
+        />
+
+        <SummaryItem
+          label="Cooking now"
+          value={
+            todayStats.cooking
+          }
+          icon={
+            <LocalFireDepartmentRounded
+              sx={{
+                fontSize: 14,
+                color:
+                  "#6f7772",
+              }}
+            />
+          }
+        />
+
+        <SummaryItem
+          label="Today's revenue"
+          value={`₹${todayStats.revenue.toLocaleString(
+            "en-IN"
+          )}`}
+          color="#22c55e"
+          icon={
+            <TrendingUpRounded
+              sx={{
+                fontSize: 14,
+                color:
+                  "#6f7772",
+              }}
+            />
+          }
+        />
+
+      </Box>
+
+
+      {/* =================================================
+          MAIN GRID
+      ================================================= */}
 
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            sm: "repeat(2,1fr)",
-            lg: "repeat(4,1fr)",
+            lg: "1.55fr 1fr",
           },
           gap: 2,
-          mb: 3,
         }}
       >
-        <StatCard
-          title="Total Orders"
-          value={orders.length}
-          subtitle="All received orders"
-          icon={
-            <ShoppingBagRounded
-              sx={{
-                color: "#2563eb",
-              }}
-            />
-          }
-          iconBg="#eff6ff"
-        />
 
-        <StatCard
-          title="Today's Revenue"
-          value={`₹${revenue.toLocaleString(
-            "en-IN"
-          )}`}
-          subtitle="From current orders"
-          icon={
-            <TrendingUpRounded
-              sx={{
-                color: "#16a34a",
-              }}
-            />
-          }
-          iconBg="#f0fdf4"
-        />
+        {/* TODAY'S ORDERS */}
 
-        <StatCard
-          title="Pending Orders"
-          value={pendingOrders}
-          subtitle="Waiting for action"
-          icon={
-            <AccessTimeRounded
-              sx={{
-                color: "#d97706",
-              }}
-            />
-          }
-          iconBg="#fffbeb"
-        />
-
-        <StatCard
-          title="Completed"
-          value={completedOrders}
-          subtitle={`${cookingOrders} currently preparing`}
-          icon={
-            <CheckCircleRounded
-              sx={{
-                color: "#0f766e",
-              }}
-            />
-          }
-          iconBg="#f0fdfa"
-        />
-      </Box>
-
-      {/* RECENT ORDERS */}
-
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "18px",
-          border:
-            "1px solid #e2e8f0",
-          overflow: "hidden",
-          background: "#fff",
-        }}
-      >
-        <Box
+        <Paper
+          elevation={0}
           sx={{
-            p: 2,
-            display: "flex",
-            justifyContent:
-              "space-between",
-            alignItems: "center",
+            background:
+              "#171918",
+            border:
+              "1px solid #2a2e2b",
+            borderRadius: "16px",
+            overflow: "hidden",
+            color: "#ffffff",
           }}
         >
-          <Box>
-            <Typography
-              sx={{
-                fontWeight: 900,
-                fontSize: 17,
-                color: "#0f172a",
-              }}
-            >
-              Recent Orders
-            </Typography>
 
-            <Typography
-              sx={{
-                mt: 0.3,
-                color: "#94a3b8",
-                fontSize: 11.5,
-              }}
-            >
-              Latest restaurant
-              activity
-            </Typography>
-          </Box>
-
-          <Button
-            onClick={() =>
-              handleNavigation(
-                "orders"
-              )
-            }
+          <Box
             sx={{
-              textTransform:
-                "none",
-              fontWeight: 800,
-              color: "#0f766e",
+              px: 2.5,
+              py: 2,
+              display: "flex",
+              justifyContent:
+                "space-between",
+              alignItems:
+                "center",
+              borderBottom:
+                "1px solid #292d2a",
             }}
           >
-            View all
-          </Button>
-        </Box>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow
-                sx={{
-                  background:
-                    "#f8fafc",
-                }}
+            <Box>
+              <Typography
+                fontSize={16}
+                fontWeight={900}
               >
-                <TableCell
+                Today's Orders
+              </Typography>
+
+              <Typography
+                fontSize={10.5}
+                color="#727a75"
+                sx={{ mt: 0.3 }}
+              >
+                Latest customer
+                orders.
+              </Typography>
+            </Box>
+
+
+            <Button
+              size="small"
+              endIcon={
+                <ArrowForwardRounded />
+              }
+              onClick={() =>
+                handleNavigation(
+                  "orders"
+                )
+              }
+              sx={{
+                color: "#60a5fa",
+                textTransform:
+                  "none",
+                fontSize: 11,
+                fontWeight: 800,
+                minWidth: 0,
+              }}
+            >
+              View all
+            </Button>
+
+          </Box>
+
+
+          {todayOrders
+            .slice(0, 6)
+            .map((order) => {
+
+              const itemCount =
+                (
+                  order.items ||
+                  []
+                ).reduce(
+                  (
+                    sum,
+                    item
+                  ) =>
+                    sum +
+                    Number(
+                      item.qty ||
+                        0
+                    ),
+                  0
+                );
+
+              return (
+                <Box
+                  key={
+                    order.id
+                  }
+                  onClick={() =>
+                    handleNavigation(
+                      "orders"
+                    )
+                  }
                   sx={{
-                    fontWeight: 850,
-                    color: "#64748b",
-                    fontSize: 11,
+                    px: 2.5,
+                    py: 1.7,
+                    borderBottom:
+                      "1px solid #242825",
+                    cursor:
+                      "pointer",
+                    transition:
+                      "background .2s ease",
+
+                    "&:hover": {
+                      background:
+                        "#1d211f",
+                    },
                   }}
                 >
-                  ORDER
-                </TableCell>
 
-                <TableCell
-                  sx={{
-                    fontWeight: 850,
-                    color: "#64748b",
-                    fontSize: 11,
-                  }}
-                >
-                  CUSTOMER
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 850,
-                    color: "#64748b",
-                    fontSize: 11,
-                  }}
-                >
-                  TOTAL
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 850,
-                    color: "#64748b",
-                    fontSize: 11,
-                  }}
-                >
-                  STATUS
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {orders
-                .slice(0, 6)
-                .map((order) => (
-                  <TableRow
-                    key={order.id}
-                    hover
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
                   >
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontWeight: 850,
-                          fontSize: 13,
-                        }}
-                      >
-                        #
-                        {String(
-                          order.id
-                        ).padStart(
-                          6,
-                          "0"
-                        )}
-                      </Typography>
-                    </TableCell>
 
-                 <TableCell sx={{ minWidth: 250 }}>
-  <Stack spacing={0.5}>
-    {/* Customer Name */}
-    <Typography
-      sx={{
-        fontWeight: 850,
-        fontSize: 13,
-        color: "#0f172a",
-      }}
-    >
-      {order.customerName || "Unknown Customer"}
-    </Typography>
-
-    {/* Phone */}
-    <Typography
-      sx={{
-        color: "#64748b",
-        fontSize: 11.5,
-        fontWeight: 600,
-      }}
-    >
-      📞 {order.customerPhone || "No phone"}
-    </Typography>
-
-    {/* Address */}
-    {order.address && (
-      <Typography
-        sx={{
-          color: "#475569",
-          fontSize: 11.5,
-          lineHeight: 1.4,
-          mt: 0.3,
-        }}
-      >
-        📍 {order.address}
-      </Typography>
-    )}
-
-    {/* Landmark */}
-    {order.landmark && (
-      <Typography
-        sx={{
-          color: "#64748b",
-          fontSize: 11,
-          lineHeight: 1.4,
-        }}
-      >
-        🏷️ Near {order.landmark}
-      </Typography>
-    )}
-
-    {/* Payment */}
-    {order.paymentMethod && (
-      <Chip
-        label={String(order.paymentMethod).toUpperCase()}
-        size="small"
-        sx={{
-          width: "fit-content",
-          mt: 0.5,
-          height: 22,
-          borderRadius: "7px",
-          background: "#ecfdf5",
-          color: "#047857",
-          fontWeight: 800,
-          fontSize: 9.5,
-        }}
-      />
-    )}
-  </Stack>
-</TableCell>
-
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontWeight: 900,
-                        }}
-                      >
-                        ₹
-                        {
-                          order.totalAmount
-                        }
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <StatusChip
-                        status={
-                          order.status
-                        }
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-              {orders.length ===
-                0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    align="center"
-                    sx={{
-                      py: 6,
-                    }}
-                  >
-                    <Typography
+                    <Box
                       sx={{
-                        color:
-                          "#94a3b8",
+                        minWidth: 0,
                       }}
                     >
-                      No orders yet.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </>
-  );
 
-  /* =======================================================
-     ORDERS VIEW
-  ======================================================= */
-
-  const ordersView = (
-    <>
-      <Box sx={{ mb: 3 }}>
-        <Typography
-          sx={{
-            fontSize: 29,
-            fontWeight: 950,
-            color: "#0f172a",
-          }}
-        >
-          Orders
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 0.5,
-            color: "#64748b",
-          }}
-        >
-          Manage customer orders
-          and update their status.
-        </Typography>
-      </Box>
-
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "18px",
-          border:
-            "1px solid #e2e8f0",
-          overflow: "hidden",
-        }}
-      >
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow
-                sx={{
-                  background:
-                    "#f8fafc",
-                }}
-              >
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Order
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Customer
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Items
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Total
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Status
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Update
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {orders.map(
-                (order) => (
-                  <TableRow
-                    key={order.id}
-                    hover
-                  >
-                    <TableCell>
                       <Typography
-                        sx={{
-                          fontWeight: 900,
-                          fontSize: 13,
-                        }}
+                        fontWeight={850}
+                        fontSize={13}
+                        color="#f3f4f6"
                       >
                         #
                         {String(
@@ -1287,17 +1090,8 @@ export default function AdminDashboard() {
                         ).padStart(
                           6,
                           "0"
-                        )}
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: 13,
-                        }}
-                      >
+                        )}{" "}
+                        •{" "}
                         {
                           order.customerName
                         }
@@ -1305,692 +1099,887 @@ export default function AdminDashboard() {
 
                       <Typography
                         sx={{
+                          mt: 0.35,
                           color:
-                            "#94a3b8",
+                            "#737a75",
                           fontSize: 11,
+                          overflow:
+                            "hidden",
+                          textOverflow:
+                            "ellipsis",
+                          whiteSpace:
+                            "nowrap",
+                          maxWidth: {
+                            xs: 180,
+                            sm: 350,
+                          },
                         }}
                       >
-                        {
-                          order.customerPhone
-                        }
+                        {itemCount}{" "}
+                        {itemCount ===
+                        1
+                          ? "item"
+                          : "items"}{" "}
+                        • ₹
+                        {Number(
+                          order.totalAmount ||
+                            0
+                        ).toLocaleString(
+                          "en-IN"
+                        )}
                       </Typography>
-                    </TableCell>
 
-                    <TableCell
-                      sx={{
-                        maxWidth: 300,
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize: 12,
-                          color:
-                            "#475569",
-                        }}
-                      >
-                        {(
-                          order.items ||
-                          []
-                        )
-                          .map(
-                            (item) =>
-                              `${item.qty}× ${item.name} (${item.type})`
-                          )
-                          .join(
-                            ", "
-                          )}
-                      </Typography>
-                    </TableCell>
+                    </Box>
 
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontWeight: 900,
-                        }}
-                      >
-                        ₹
-                        {
-                          order.totalAmount
-                        }
-                      </Typography>
-                    </TableCell>
 
-                    <TableCell>
-                      <StatusChip
-                        status={
-                          order.status
-                        }
-                      />
-                    </TableCell>
+                    <StatusChip
+                      status={
+                        order.status
+                      }
+                    />
 
-                    <TableCell>
-                      <Select
-                        size="small"
-                        value={
-                          order.status ||
-                          "Pending"
-                        }
-                        onChange={(event) =>
-                          handleStatusUpdate(
-                            order.id,
-                            event
-                              .target
-                              .value
-                          )
-                        }
-                        sx={{
-                          minWidth: 125,
-                          borderRadius:
-                            "10px",
-                          fontSize: 12,
-                        }}
-                      >
-                        <MenuItem value="Pending">
-                          Pending
-                        </MenuItem>
+                  </Stack>
 
-                        <MenuItem value="Cooking">
-                          Cooking
-                        </MenuItem>
+                </Box>
+              );
+            })}
 
-                        <MenuItem value="Delivered">
-                          Delivered
-                        </MenuItem>
 
-                        <MenuItem value="Cancelled">
-                          Cancelled
-                        </MenuItem>
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                )
-              )}
+          {todayOrders.length ===
+            0 && (
+            <Box
+              sx={{
+                py: 6,
+                textAlign:
+                  "center",
+              }}
+            >
 
-              {orders.length ===
-                0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
+              <ShoppingBagRounded
+                sx={{
+                  fontSize: 42,
+                  color:
+                    "#3d433f",
+                }}
+              />
+
+              <Typography
+                sx={{
+                  mt: 1,
+                  fontWeight: 800,
+                  color:
+                    "#9ca3af",
+                }}
+              >
+                No orders today
+              </Typography>
+
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  fontSize: 11,
+                  color:
+                    "#5e655f",
+                }}
+              >
+                New orders will
+                appear here.
+              </Typography>
+
+            </Box>
+          )}
+
+        </Paper>
+
+
+        {/* ORDER STATUS */}
+
+        <Paper
+          elevation={0}
+          sx={{
+            background:
+              "#171918",
+            border:
+              "1px solid #2a2e2b",
+            borderRadius: "16px",
+            p: 2.5,
+            color: "#ffffff",
+          }}
+        >
+
+          <Typography
+            fontSize={16}
+            fontWeight={900}
+          >
+            Today's Order Status
+          </Typography>
+
+          <Typography
+            fontSize={10.5}
+            color="#727a75"
+            sx={{
+              mt: 0.3,
+              mb: 3,
+            }}
+          >
+            Current order
+            distribution.
+          </Typography>
+
+
+          {[
+            {
+              label: "Pending",
+              value:
+                todayStats.pending,
+              color:
+                "#f59e0b",
+            },
+            {
+              label: "Cooking",
+              value:
+                todayStats.cooking,
+              color:
+                "#f97316",
+            },
+            {
+              label: "Delivered",
+              value:
+                todayStats.delivered,
+              color:
+                "#22c55e",
+            },
+            {
+              label: "Cancelled",
+              value:
+                todayStats.cancelled,
+              color:
+                "#ef4444",
+            },
+          ].map(
+            (item) => {
+
+              const percentage =
+                todayOrders.length >
+                0
+                  ? Math.round(
+                      (item.value /
+                        todayOrders.length) *
+                        100
+                    )
+                  : 0;
+
+              return (
+                <Box
+                  key={
+                    item.label
+                  }
+                  sx={{
+                    mb: 2.1,
+                  }}
+                >
+
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
                     sx={{
-                      py: 7,
+                      mb: 0.7,
                     }}
                   >
+
                     <Typography
-                      sx={{
-                        color:
-                          "#94a3b8",
-                      }}
+                      fontSize={11.5}
+                      fontWeight={750}
+                      color="#c7cbc8"
                     >
-                      No orders
-                      available.
+                      {item.label}
                     </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </>
-  );
 
-  /* =======================================================
-     MENU VIEW
-  ======================================================= */
+                    <Typography
+                      fontSize={11.5}
+                      fontWeight={900}
+                      color="#f3f4f6"
+                    >
+                      {item.value}
+                    </Typography>
 
-  const menuView = (
-    <>
-      <Box
-        sx={{
-          mb: 3,
-          display: "flex",
-          justifyContent:
-            "space-between",
-          alignItems: {
-            xs: "flex-start",
-            sm: "center",
-          },
-          flexDirection: {
-            xs: "column",
-            sm: "row",
-          },
-          gap: 2,
-        }}
-      >
-        <Box>
-          <Typography
-            sx={{
-              fontSize: 29,
-              fontWeight: 950,
-              color: "#0f172a",
-            }}
-          >
-            Menu Management
-          </Typography>
+                  </Stack>
 
-          <Typography
-            sx={{
-              mt: 0.5,
-              color: "#64748b",
-            }}
-          >
-            Add, edit and manage
-            your restaurant dishes.
-          </Typography>
-        </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<AddRounded />}
-          onClick={openAddItem}
-          sx={{
-            height: 45,
-            px: 2,
-            borderRadius: "12px",
-            textTransform:
-              "none",
-            fontWeight: 850,
-            background:
-              "linear-gradient(135deg,#0f766e,#0e7490)",
-            boxShadow:
-              "0 8px 20px rgba(15,118,110,.2)",
-
-            "&:hover": {
-              background:
-                "linear-gradient(135deg,#115e59,#155e75)",
-            },
-          }}
-        >
-          Add New Dish
-        </Button>
-      </Box>
-
-      {/* SEARCH / FILTER */}
-
-      <Paper
-        elevation={0}
-        sx={{
-          p: 1.2,
-          mb: 2,
-          borderRadius: "16px",
-          border:
-            "1px solid #e2e8f0",
-        }}
-      >
-        <Stack
-          direction={{
-            xs: "column",
-            sm: "row",
-          }}
-          spacing={1.2}
-        >
-          <TextField
-            fullWidth
-            size="small"
-            value={search}
-            onChange={(event) =>
-              setSearch(
-                event.target.value
-              )
-            }
-            placeholder="Search dishes..."
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchRounded
+                  <Box
                     sx={{
-                      color:
-                        "#94a3b8",
+                      height: 6,
+                      borderRadius:
+                        "20px",
+                      background:
+                        "#292d2a",
+                      overflow:
+                        "hidden",
                     }}
-                  />
-                </InputAdornment>
-              ),
-            }}
+                  >
+                    <Box
+                      sx={{
+                        height:
+                          "100%",
+                        width: `${percentage}%`,
+                        background:
+                          item.color,
+                        borderRadius:
+                          "20px",
+                        transition:
+                          "width .3s ease",
+                      }}
+                    />
+                  </Box>
+
+                </Box>
+              );
+            }
+          )}
+
+
+          <Divider
             sx={{
-              "& .MuiOutlinedInput-root":
-                {
-                  borderRadius:
-                    "10px",
-                },
+              my: 2.5,
+              borderColor:
+                "#292d2a",
             }}
           />
 
-          <Select
-            size="small"
-            value={categoryFilter}
-            onChange={(event) =>
-              setCategoryFilter(
-                event.target.value
-              )
-            }
+
+          <Box
             sx={{
-              minWidth: {
-                xs: "100%",
-                sm: 190,
-              },
+              p: 1.8,
               borderRadius:
-                "10px",
+                "12px",
+              background:
+                "rgba(34,197,94,.07)",
+              border:
+                "1px solid rgba(34,197,94,.14)",
             }}
           >
-            {categories.map(
-              (category) => (
-                <MenuItem
-                  key={category}
-                  value={category}
+
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+
+              <Box>
+                <Typography
+                  fontSize={10}
+                  color="#6f7772"
                 >
-                  {category}
-                </MenuItem>
-              )
-            )}
-          </Select>
-        </Stack>
-      </Paper>
+                  Net revenue today
+                </Typography>
 
-      {/* MENU TABLE */}
+                <Typography
+                  sx={{
+                    mt: 0.4,
+                    fontSize: 18,
+                    fontWeight: 950,
+                    color:
+                      "#22c55e",
+                  }}
+                >
+                  ₹
+                  {todayStats.revenue.toLocaleString(
+                    "en-IN"
+                  )}
+                </Typography>
+              </Box>
 
-      <Paper
-        elevation={0}
+              <TrendingUpRounded
+                sx={{
+                  color:
+                    "#22c55e",
+                  fontSize: 25,
+                }}
+              />
+
+            </Stack>
+
+            <Typography
+              sx={{
+                mt: 1,
+                fontSize: 10,
+                color:
+                  "#657069",
+              }}
+            >
+              Cancelled orders
+              are excluded.
+            </Typography>
+
+          </Box>
+
+        </Paper>
+
+      </Box>
+
+
+      {/* =================================================
+          SECOND ROW
+      ================================================= */}
+
+      <Box
         sx={{
-          borderRadius: "18px",
-          border:
-            "1px solid #e2e8f0",
-          overflow: "hidden",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "1fr 1fr",
+          },
+          gap: 2,
+          mt: 2,
         }}
       >
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow
-                sx={{
-                  background:
-                    "#f8fafc",
-                }}
+
+        {/* TOP DISHES */}
+
+        <Paper
+          elevation={0}
+          sx={{
+            background:
+              "#171918",
+            border:
+              "1px solid #2a2e2b",
+            borderRadius: "16px",
+            p: 2.5,
+          }}
+        >
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
+
+            <Box>
+              <Typography
+                fontSize={16}
+                fontWeight={900}
               >
-                <TableCell
+                Popular Dishes
+              </Typography>
+
+              <Typography
+                fontSize={10.5}
+                color="#727a75"
+                sx={{ mt: 0.3 }}
+              >
+                Based on today's orders.
+              </Typography>
+            </Box>
+
+            <RestaurantMenuRounded
+              sx={{
+                color:
+                  "#3f4842",
+              }}
+            />
+
+          </Stack>
+
+
+          {topDishes.length >
+          0 ? (
+            topDishes.map(
+              (
+                dish,
+                index
+              ) => (
+                <Box
+                  key={
+                    dish[0]
+                  }
                   sx={{
-                    fontWeight: 900,
+                    display:
+                      "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "space-between",
+                    py: 1.15,
+                    borderBottom:
+                      index <
+                      topDishes.length -
+                        1
+                        ? "1px solid #252a27"
+                        : "none",
                   }}
                 >
-                  Dish
-                </TableCell>
 
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Category
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Half / Full
-                </TableCell>
-
-                <TableCell
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Status
-                </TableCell>
-
-                <TableCell
-                  align="right"
-                  sx={{
-                    fontWeight: 900,
-                  }}
-                >
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {filteredMenu.map(
-                (item) => (
-                  <TableRow
-                    key={item.id}
-                    hover
+                  <Stack
+                    direction="row"
+                    spacing={1.2}
+                    alignItems="center"
                   >
-                    <TableCell>
-                      <Stack
-                        direction="row"
-                        spacing={1.3}
-                        alignItems="center"
-                      >
-                        <Avatar
-                          src={
-                            item.image
-                          }
-                          variant="rounded"
-                          sx={{
-                            width: 48,
-                            height: 48,
-                            borderRadius:
-                              "10px",
-                          }}
-                        >
-                          <RestaurantMenuRounded />
-                        </Avatar>
 
-                        <Box>
-                          <Typography
-                            sx={{
-                              fontWeight: 850,
-                              fontSize: 13,
-                            }}
-                          >
-                            {
-                              item.name
-                            }
-                          </Typography>
+                    <Box
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius:
+                          "9px",
+                        display:
+                          "grid",
+                        placeItems:
+                          "center",
+                        background:
+                          "#202421",
+                        color:
+                          "#a8afa9",
+                        fontSize: 11,
+                        fontWeight:
+                          900,
+                      }}
+                    >
+                      {index + 1}
+                    </Box>
 
-                          {item.bestseller && (
-                            <Chip
-                              icon={
-                                <LocalFireDepartmentRounded />
-                              }
-                              label="Bestseller"
-                              size="small"
-                              sx={{
-                                mt: 0.5,
-                                height: 21,
-                                fontSize: 9,
-                                fontWeight: 850,
-                                color:
-                                  "#c2410c",
-                                background:
-                                  "#ffedd5",
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Stack>
-                    </TableCell>
+                    <Typography
+                      fontSize={12}
+                      fontWeight={750}
+                      color="#d5d8d6"
+                    >
+                      {dish[0]}
+                    </Typography>
 
-                    <TableCell>
-                      <Chip
-                        label={
-                          item.category ||
-                          "Other"
-                        }
-                        size="small"
-                        sx={{
-                          background:
-                            "#f1f5f9",
-                          color:
-                            "#475569",
-                          fontWeight: 750,
-                        }}
-                      />
-                    </TableCell>
+                  </Stack>
 
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: 13,
-                        }}
-                      >
-                        ₹
-                        {
-                          item.priceHalf
-                        }{" "}
-                        / ₹
-                        {
-                          item.priceFull
-                        }
-                      </Typography>
-                    </TableCell>
 
-                    <TableCell>
-                      <Chip
-                        label={
-                          item.available ===
-                          false
-                            ? "Unavailable"
-                            : "Available"
-                        }
-                        size="small"
-                        sx={{
-                          background:
-                            item.available ===
-                            false
-                              ? "#fee2e2"
-                              : "#dcfce7",
-                          color:
-                            item.available ===
-                            false
-                              ? "#991b1b"
-                              : "#166534",
-                          fontWeight: 800,
-                        }}
-                      />
-                    </TableCell>
+                  <Typography
+                    fontSize={12}
+                    fontWeight={900}
+                    color="#22c55e"
+                  >
+                    {dish[1]} sold
+                  </Typography>
 
-                    <TableCell align="right">
-                      <IconButton
-                        onClick={() =>
-                          openEditItem(
-                            item
-                          )
-                        }
-                        sx={{
-                          color:
-                            "#2563eb",
-                          mr: 0.5,
-                        }}
-                      >
-                        <EditRounded />
-                      </IconButton>
+                </Box>
+              )
+            )
+          ) : (
+            <Box
+              sx={{
+                py: 3,
+                textAlign:
+                  "center",
+              }}
+            >
+              <Typography
+                fontSize={12}
+                color="#626963"
+              >
+                No dish data yet.
+              </Typography>
+            </Box>
+          )}
 
-                      <IconButton
-                        onClick={() =>
-                          handleDeleteItem(
-                            item.id
-                          )
-                        }
-                        sx={{
-                          color:
-                            "#dc2626",
-                        }}
-                      >
-                        <DeleteOutlineRounded />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+        </Paper>
+
+
+        {/* QUICK ACTIONS */}
+
+        <Paper
+          elevation={0}
+          sx={{
+            background:
+              "#171918",
+            border:
+              "1px solid #2a2e2b",
+            borderRadius: "16px",
+            p: 2.5,
+          }}
+        >
+
+          <Typography
+            fontSize={16}
+            fontWeight={900}
+          >
+            Quick Actions
+          </Typography>
+
+          <Typography
+            fontSize={10.5}
+            color="#727a75"
+            sx={{
+              mt: 0.3,
+              mb: 2,
+            }}
+          >
+            Manage your restaurant quickly.
+          </Typography>
+
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(2,1fr)",
+              gap: 1.2,
+            }}
+          >
+
+            <Button
+              startIcon={
+                <AddRounded />
+              }
+              onClick={() =>
+                handleNavigation(
+                  "menu"
                 )
-              )}
+              }
+              sx={{
+                justifyContent:
+                  "flex-start",
+                minHeight: 48,
+                px: 1.5,
+                borderRadius:
+                  "10px",
+                textTransform:
+                  "none",
+                color: "#c9cecb",
+                background:
+                  "#202421",
+                border:
+                  "1px solid #2d322e",
+                fontSize: 11,
+                fontWeight: 800,
 
-              {filteredMenu.length ===
-                0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    align="center"
-                    sx={{
-                      py: 7,
-                    }}
-                  >
-                    <RestaurantMenuRounded
-                      sx={{
-                        fontSize: 42,
-                        color:
-                          "#cbd5e1",
-                      }}
-                    />
+                "&:hover": {
+                  background:
+                    "#263027",
+                  color:
+                    "#22c55e",
+                },
+              }}
+            >
+              Add Dish
+            </Button>
 
-                    <Typography
-                      sx={{
-                        mt: 1,
-                        fontWeight: 850,
-                      }}
-                    >
-                      No dishes found
-                    </Typography>
 
-                    <Typography
-                      sx={{
-                        color:
-                          "#94a3b8",
-                        fontSize: 12,
-                      }}
-                    >
-                      Try another
-                      search or
-                      category.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </>
+            <Button
+              startIcon={
+                <ReceiptLongRounded />
+              }
+              onClick={() =>
+                handleNavigation(
+                  "orders"
+                )
+              }
+              sx={{
+                justifyContent:
+                  "flex-start",
+                minHeight: 48,
+                px: 1.5,
+                borderRadius:
+                  "10px",
+                textTransform:
+                  "none",
+                color: "#c9cecb",
+                background:
+                  "#202421",
+                border:
+                  "1px solid #2d322e",
+                fontSize: 11,
+                fontWeight: 800,
+
+                "&:hover": {
+                  background:
+                    "#263027",
+                  color:
+                    "#22c55e",
+                },
+              }}
+            >
+              Manage Orders
+            </Button>
+
+
+            <Button
+              startIcon={
+                <RestaurantMenuRounded />
+              }
+              onClick={() =>
+                handleNavigation(
+                  "menu"
+                )
+              }
+              sx={{
+                justifyContent:
+                  "flex-start",
+                minHeight: 48,
+                px: 1.5,
+                borderRadius:
+                  "10px",
+                textTransform:
+                  "none",
+                color: "#c9cecb",
+                background:
+                  "#202421",
+                border:
+                  "1px solid #2d322e",
+                fontSize: 11,
+                fontWeight: 800,
+
+                "&:hover": {
+                  background:
+                    "#263027",
+                  color:
+                    "#22c55e",
+                },
+              }}
+            >
+              Manage Menu
+            </Button>
+
+
+            <Button
+              startIcon={
+                <AnalyticsRounded />
+              }
+              onClick={() =>
+                handleNavigation(
+                  "analytics"
+                )
+              }
+              sx={{
+                justifyContent:
+                  "flex-start",
+                minHeight: 48,
+                px: 1.5,
+                borderRadius:
+                  "10px",
+                textTransform:
+                  "none",
+                color: "#c9cecb",
+                background:
+                  "#202421",
+                border:
+                  "1px solid #2d322e",
+                fontSize: 11,
+                fontWeight: 800,
+
+                "&:hover": {
+                  background:
+                    "#263027",
+                  color:
+                    "#22c55e",
+                },
+              }}
+            >
+              Analytics
+            </Button>
+
+          </Box>
+
+        </Paper>
+
+      </Box>
+
+
+      {/* FOOTER NOTE */}
+
+      <Box
+        sx={{
+          mt: 2,
+          px: 1,
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+
+        <Typography
+          fontSize={9.5}
+          color="#555d58"
+        >
+          Famous Cook Admin • Today
+        </Typography>
+
+        <Typography
+          fontSize={9.5}
+          color="#555d58"
+        >
+          Revenue excludes cancelled orders
+        </Typography>
+
+      </Box>
+
+    </Box>
   );
 
-  /* =======================================================
-     PLACEHOLDER VIEWS
-  ======================================================= */
+
+  /* =========================================================
+     PLACEHOLDER
+  ========================================================= */
 
   const placeholderView = (
     <Paper
       elevation={0}
       sx={{
-        p: {
-          xs: 4,
-          md: 7,
-        },
+        minHeight: 450,
+        display: "grid",
+        placeItems: "center",
         textAlign: "center",
         borderRadius: "20px",
+        background: "#171918",
         border:
-          "1px solid #e2e8f0",
+          "1px solid #2a2e2b",
+        color: "#ffffff",
+        p: 4,
       }}
     >
-      <Box
-        sx={{
-          width: 65,
-          height: 65,
-          mx: "auto",
-          borderRadius: "18px",
-          display: "grid",
-          placeItems: "center",
-          background: "#f1f5f9",
-          color: "#64748b",
-        }}
-      >
-        <MoreHorizRounded
+      <Box>
+        <Box
           sx={{
-            fontSize: 34,
+            width: 65,
+            height: 65,
+            mx: "auto",
+            borderRadius: "18px",
+            display: "grid",
+            placeItems: "center",
+            background:
+              "#202421",
+            color: "#606862",
           }}
-        />
+        >
+          <MoreHorizRounded
+            sx={{
+              fontSize: 34,
+            }}
+          />
+        </Box>
+
+        <Typography
+          sx={{
+            mt: 2,
+            fontSize: 22,
+            fontWeight: 900,
+          }}
+        >
+          {
+            navigation.find(
+              (item) =>
+                item.key ===
+                activePage
+            )?.label
+          }
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 0.7,
+            color: "#737a75",
+            maxWidth: 420,
+            mx: "auto",
+            fontSize: 13,
+          }}
+        >
+          This section will be
+          added in the next stage
+          of the Famous Cook admin
+          system.
+        </Typography>
       </Box>
-
-      <Typography
-        sx={{
-          mt: 2,
-          fontSize: 22,
-          fontWeight: 900,
-          color: "#0f172a",
-        }}
-      >
-        {navigation.find(
-          (item) =>
-            item.key ===
-            activePage
-        )?.label || "Coming Soon"}
-      </Typography>
-
-      <Typography
-        sx={{
-          mt: 0.7,
-          color: "#64748b",
-          maxWidth: 460,
-          mx: "auto",
-        }}
-      >
-        This section is planned
-        for the next stage of
-        the Famous Cook admin
-        system.
-      </Typography>
     </Paper>
   );
 
-  /* =======================================================
+
+  /* =========================================================
      ACTIVE CONTENT
-  ======================================================= */
+  ========================================================= */
 
   const activeContent =
     activePage === "dashboard"
       ? dashboardView
       : activePage === "menu"
-      ? menuView
+      ? (
+          <AdminMenu
+            menu={menuItems}
+            onRefresh={fetchData}
+            onError={setError}
+          />
+        )
       : activePage === "orders"
-      ? ordersView
+      ? (
+          <AdminOrders
+            orders={orders}
+            onRefresh={fetchData}
+            onError={setError}
+          />
+        )
       : placeholderView;
 
-  /* =======================================================
+
+  /* =========================================================
      RENDER
-  ======================================================= */
+  ========================================================= */
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
         background:
-          "#f8fafc",
+          "#0d0f0e",
       }}
     >
+
       {/* DESKTOP SIDEBAR */}
 
       {!isMobile && (
         <Drawer
           variant="permanent"
           sx={{
-            width: drawerWidth,
+            width:
+              drawerWidth,
             flexShrink: 0,
 
-            "& .MuiDrawer-paper":
-              {
-                width:
-                  drawerWidth,
-                boxSizing:
-                  "border-box",
-                border: "none",
-              },
+            "& .MuiDrawer-paper": {
+              width:
+                drawerWidth,
+              boxSizing:
+                "border-box",
+              border: "none",
+              background:
+                "#101211",
+            },
           }}
         >
           {sidebarContent}
         </Drawer>
       )}
 
-      {/* MOBILE DRAWER */}
+
+      {/* MOBILE SIDEBAR */}
 
       {isMobile && (
         <Drawer
           open={mobileOpen}
           onClose={() =>
-            setMobileOpen(false)
+            setMobileOpen(
+              false
+            )
           }
           sx={{
-            "& .MuiDrawer-paper":
-              {
-                width:
-                  drawerWidth,
-                border: "none",
-              },
+            "& .MuiDrawer-paper": {
+              width:
+                drawerWidth,
+              border: "none",
+              background:
+                "#101211",
+            },
           }}
         >
           {sidebarContent}
         </Drawer>
       )}
+
 
       {/* MAIN */}
 
@@ -2000,40 +1989,55 @@ export default function AdminDashboard() {
             xs: 0,
             md: `${drawerWidth}px`,
           },
-          minHeight: "100vh",
+          minHeight:
+            "100vh",
+          background:
+            activePage ===
+            "dashboard"
+              ? "#0d0f0e"
+              : "#f8fafc",
         }}
       >
+
         {/* TOP BAR */}
 
-        <Paper
-          elevation={0}
+        <Box
           sx={{
-            height: 72,
+            height: 68,
             px: {
               xs: 1.5,
               md: 3,
             },
             display: "flex",
-            alignItems: "center",
+            alignItems:
+              "center",
             justifyContent:
               "space-between",
             borderBottom:
-              "1px solid #e2e8f0",
-            borderRadius: 0,
+              "1px solid",
+            borderColor:
+              activePage ===
+              "dashboard"
+                ? "#252a27"
+                : "#e2e8f0",
             background:
-              "rgba(255,255,255,.92)",
-            backdropFilter:
-              "blur(14px)",
-            position: "sticky",
+              activePage ===
+              "dashboard"
+                ? "#101211"
+                : "#ffffff",
+            position:
+              "sticky",
             top: 0,
             zIndex: 10,
           }}
         >
+
           <Stack
             direction="row"
             spacing={1}
             alignItems="center"
           >
+
             {isMobile && (
               <IconButton
                 onClick={() =>
@@ -2041,17 +2045,29 @@ export default function AdminDashboard() {
                     true
                   )
                 }
+                sx={{
+                  color:
+                    activePage ===
+                    "dashboard"
+                      ? "#d1d5db"
+                      : "#334155",
+                }}
               >
                 <MenuRounded />
               </IconButton>
             )}
 
+
             <Box>
               <Typography
                 sx={{
-                  fontSize: 13,
-                  fontWeight: 850,
-                  color: "#64748b",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color:
+                    activePage ===
+                    "dashboard"
+                      ? "#656c67"
+                      : "#64748b",
                 }}
               >
                 Admin Panel
@@ -2059,35 +2075,48 @@ export default function AdminDashboard() {
 
               <Typography
                 sx={{
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: 950,
-                  color: "#0f172a",
+                  color:
+                    activePage ===
+                    "dashboard"
+                      ? "#f3f4f6"
+                      : "#0f172a",
                 }}
               >
                 Famous Cook
               </Typography>
             </Box>
+
           </Stack>
+
 
           <Stack
             direction="row"
-            spacing={1.2}
+            spacing={1}
             alignItems="center"
           >
+
             <Box
               sx={{
                 display: {
                   xs: "none",
                   sm: "block",
                 },
-                textAlign: "right",
+                textAlign:
+                  "right",
               }}
             >
+
               <Typography
                 sx={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 850,
-                  color: "#0f172a",
+                  color:
+                    activePage ===
+                    "dashboard"
+                      ? "#d1d5db"
+                      : "#0f172a",
                 }}
               >
                 Restaurant Admin
@@ -2095,27 +2124,38 @@ export default function AdminDashboard() {
 
               <Typography
                 sx={{
-                  fontSize: 10,
-                  color: "#94a3b8",
+                  fontSize: 9.5,
+                  color:
+                    activePage ===
+                    "dashboard"
+                      ? "#626a65"
+                      : "#94a3b8",
                 }}
               >
                 Manage your restaurant
               </Typography>
+
             </Box>
+
 
             <Avatar
               sx={{
-                width: 40,
-                height: 40,
+                width: 38,
+                height: 38,
                 background:
-                  "linear-gradient(135deg,#0f766e,#2563eb)",
+                  "linear-gradient(135deg,#123c16,#166534)",
+                color: "#4ade80",
                 fontWeight: 900,
+                fontSize: 14,
               }}
             >
               A
             </Avatar>
+
           </Stack>
-        </Paper>
+
+        </Box>
+
 
         {/* CONTENT */}
 
@@ -2123,16 +2163,17 @@ export default function AdminDashboard() {
           maxWidth="xl"
           sx={{
             py: {
-              xs: 2.5,
-              md: 3.5,
+              xs: 2,
+              md: 3,
             },
             px: {
-              xs: 1.5,
+              xs: 1.2,
               sm: 2.5,
-              md: 3.5,
+              md: 3,
             },
           }}
         >
+
           {error && (
             <Alert
               severity="error"
@@ -2149,310 +2190,75 @@ export default function AdminDashboard() {
             </Alert>
           )}
 
+
           {loading ? (
-            <Paper
-              elevation={0}
+            <Box
               sx={{
                 minHeight: 500,
                 display: "grid",
-                placeItems: "center",
-                borderRadius:
-                  "20px",
-                border:
-                  "1px solid #e2e8f0",
+                placeItems:
+                  "center",
               }}
             >
+
               <Stack
                 alignItems="center"
-                spacing={1.5}
+                spacing={2}
               >
+
                 <Box
                   sx={{
-                    width: 42,
-                    height: 42,
+                    width: 45,
+                    height: 45,
                     borderRadius:
                       "50%",
                     border:
-                      "4px solid #ccfbf1",
+                      activePage ===
+                      "dashboard"
+                        ? "4px solid #263029"
+                        : "4px solid #ccfbf1",
                     borderTopColor:
-                      "#0f766e",
+                      "#22c55e",
                     animation:
                       "spin 1s linear infinite",
-                    "@keyframes spin":
-                      {
-                        from: {
-                          transform:
-                            "rotate(0deg)",
-                        },
-                        to: {
-                          transform:
-                            "rotate(360deg)",
-                        },
+
+                    "@keyframes spin": {
+                      from: {
+                        transform:
+                          "rotate(0deg)",
                       },
+                      to: {
+                        transform:
+                          "rotate(360deg)",
+                      },
+                    },
                   }}
                 />
 
                 <Typography
                   sx={{
                     color:
-                      "#64748b",
-                    fontSize: 13,
+                      activePage ===
+                      "dashboard"
+                        ? "#777e79"
+                        : "#64748b",
+                    fontSize: 12,
                   }}
                 >
-                  Loading admin
-                  dashboard...
+                  Loading admin dashboard...
                 </Typography>
+
               </Stack>
-            </Paper>
+
+            </Box>
           ) : (
             activeContent
           )}
+
         </Container>
+
       </Box>
 
-      {/* =====================================================
-          ADD / EDIT DISH DIALOG
-      ===================================================== */}
-
-      <Dialog
-        open={openItemDialog}
-        onClose={() =>
-          setOpenItemDialog(false)
-        }
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: "22px",
-            overflow: "hidden",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            px: 3,
-            pt: 3,
-            pb: 1,
-            fontWeight: 950,
-            fontSize: 22,
-          }}
-        >
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              {editingItem
-                ? "Edit Dish"
-                : "Add New Dish"}
-
-              <Typography
-                sx={{
-                  mt: 0.4,
-                  color: "#94a3b8",
-                  fontSize: 11.5,
-                  fontWeight: 500,
-                }}
-              >
-                Manage restaurant
-                menu information
-              </Typography>
-            </Box>
-
-            <IconButton
-              onClick={() =>
-                setOpenItemDialog(
-                  false
-                )
-              }
-            >
-              <CloseRounded />
-            </IconButton>
-          </Stack>
-        </DialogTitle>
-
-        <DialogContent
-          sx={{
-            px: 3,
-            pt: 2,
-          }}
-        >
-          <Stack spacing={1.8}>
-            <TextField
-              fullWidth
-              label="Dish Name"
-              value={formData.name}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  name: event.target
-                    .value,
-                })
-              }
-            />
-
-            <TextField
-              fullWidth
-              label="Category"
-              value={
-                formData.category
-              }
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  category:
-                    event.target
-                      .value,
-                })
-              }
-              placeholder="Example: Tandoor"
-            />
-
-            <Stack
-              direction={{
-                xs: "column",
-                sm: "row",
-              }}
-              spacing={1.5}
-            >
-              <TextField
-                fullWidth
-                label="Half Price"
-                type="number"
-                value={
-                  formData.priceHalf
-                }
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    priceHalf:
-                      event.target
-                        .value,
-                  })
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      ₹
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <TextField
-                fullWidth
-                label="Full Price"
-                type="number"
-                value={
-                  formData.priceFull
-                }
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    priceFull:
-                      event.target
-                        .value,
-                  })
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      ₹
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Stack>
-
-            <TextField
-              fullWidth
-              label="Food Image URL"
-              value={formData.image}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  image: event.target
-                    .value,
-                })
-              }
-              placeholder="https://..."
-            />
-
-            {formData.image && (
-              <Box
-                component="img"
-                src={formData.image}
-                alt="Dish preview"
-                onError={(event) => {
-                  event.currentTarget.style.display =
-                    "none";
-                }}
-                sx={{
-                  width: "100%",
-                  height: 180,
-                  objectFit:
-                    "cover",
-                  borderRadius:
-                    "14px",
-                  border:
-                    "1px solid #e2e8f0",
-                }}
-              />
-            )}
-          </Stack>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            px: 3,
-            pb: 3,
-            pt: 1,
-            gap: 1,
-          }}
-        >
-          <Button
-            onClick={() =>
-              setOpenItemDialog(
-                false
-              )
-            }
-            sx={{
-              px: 2,
-              borderRadius:
-                "10px",
-              textTransform:
-                "none",
-              fontWeight: 800,
-              color: "#64748b",
-            }}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            variant="contained"
-            onClick={
-              handleSaveItem
-            }
-            sx={{
-              px: 2.5,
-              borderRadius:
-                "10px",
-              textTransform:
-                "none",
-              fontWeight: 850,
-              background:
-                "linear-gradient(135deg,#0f766e,#0e7490)",
-            }}
-          >
-            {editingItem
-              ? "Save Changes"
-              : "Add Dish"}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
-

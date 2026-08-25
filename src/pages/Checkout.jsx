@@ -280,26 +280,27 @@ export default function Checkout() {
        */
 
       const orderData = {
-        customerName: form.name.trim(),
+    customerName: form.name.trim(),
 
-        customerPhone: form.phone.replace(
-          /\D/g,
-          ""
-        ),
+    customerPhone: form.phone.replace(/\D/g, ""),
 
-        items: cart.map((item) => ({
-          name: item.name,
-          type: item.type,
-          price: Number(item.price),
-          qty: Number(item.qty),
-        })),
+    address: form.address.trim(),
 
-        totalAmount: Number(grandTotal),
+    landmark: form.landmark.trim(),
 
-        // Must match your MySQL ENUM
-        status: "Pending",
-      };
+    paymentMethod: paymentMethod,
 
+    items: cart.map((item) => ({
+        name: item.name,
+        type: item.type,
+        price: Number(item.price),
+        qty: Number(item.qty),
+    })),
+
+    totalAmount: Number(grandTotal),
+
+    status: "Pending",
+};
       /*
        * Keep the complete customer information
        * for the confirmation page.

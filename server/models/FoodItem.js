@@ -12,7 +12,7 @@ const FoodItem = sequelize.define('FoodItem', {
     },
     priceHalf: {
         type: DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: true,
     },
     priceFull: {
         type: DataTypes.FLOAT,

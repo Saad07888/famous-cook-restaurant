@@ -1188,75 +1188,98 @@ export default function Menu() {
   ======================================================= */
 
   useEffect(() => {
-    let mounted = true;
+  let mounted = true;
 
-    const loadMenu = async () => {
-      try {
-        setLoading(true);
+  const loadMenu = async () => {
+    try {
+      setLoading(true);
 
-        const data =
-          await menuService.getMenu();
+      const data = await menuService.getMenu();
 
-        if (!mounted) return;
+      if (!mounted) return;
 
-        const items = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.items)
-          ? data.items
-          : [];
+      const apiItems = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : [];
 
-        /*
-         * IMPORTANT:
-         *
-         * Do NOT replace the premium 12-dish
-         * restaurant menu with a partial API menu.
-         *
-         * Only use API data when it contains
-         * a complete menu.
-         */
-
-        if (
-          items.length >=
-          fallbackMenu.length
-        ) {
-          setFoodItems(
-            items.map(normalizeItem)
+      const normalizedApiItems = apiItems.map(
+        (item, index) => {
+          const normalized = normalizeItem(
+            item,
+            index
           );
 
-          setError("");
-        } else {
-          setFoodItems(fallbackMenu);
+          // Fix category spelling from database
+          if (
+            normalized.category
+              .trim()
+              .toLowerCase() === "chichen gravy"
+          ) {
+            normalized.category = "Chicken Gravy";
+          }
 
-          setError(
-            "Showing our restaurant menu while the live menu is being updated."
-          );
+          return normalized;
         }
-      } catch (err) {
-        console.error(
-          "Menu API error:",
-          err
-        );
+      );
 
-        if (!mounted) return;
+      /*
+       * Combine fallback menu + live database menu.
+       *
+       * Database items are kept.
+       * If the same dish already exists in fallback,
+       * the database version is used.
+       */
 
-        setFoodItems(fallbackMenu);
+      const allItems = [
+        ...fallbackMenu,
+        ...normalizedApiItems,
+      ];
 
-        setError(
-          "Showing our restaurant menu while the live menu is unavailable."
-        );
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+      // Remove duplicate dishes by name
+      const uniqueItems = Array.from(
+        new Map(
+          allItems.map((item) => [
+            item.name.trim().toLowerCase(),
+            item,
+          ])
+        ).values()
+      );
+
+      setFoodItems(uniqueItems);
+
+      setError(
+        normalizedApiItems.length > 0
+          ? ""
+          : "Showing our restaurant menu while the live menu is being updated."
+      );
+    } catch (err) {
+      console.error(
+        "Menu API error:",
+        err
+      );
+
+      if (!mounted) return;
+
+      setFoodItems(fallbackMenu);
+
+      setError(
+        "Showing our restaurant menu while the live menu is unavailable."
+      );
+    } finally {
+      if (mounted) {
+        setLoading(false);
       }
-    };
+    }
+  };
 
-    loadMenu();
+  loadMenu();
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  return () => {
+    mounted = false;
+  };
+}, []);
 
   /* =======================================================
      SAVE FAVORITES
