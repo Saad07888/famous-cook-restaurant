@@ -29,14 +29,11 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
-import QrCode2Icon from "@mui/icons-material/QrCode2";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
@@ -46,8 +43,24 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { orderService } from "../services/api";
 
-const UPI_ID = "famouscook@upi";
-const MERCHANT_NAME = "Famous Cook";
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+
+    document.body.appendChild(script);
+  });
+};
+
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -77,8 +90,7 @@ export default function Checkout() {
   // PAYMENT
   // ------------------------------------------------------------
 
-  const [paymentMethod, setPaymentMethod] = useState("UPI");
-  const [upiPaid, setUpiPaid] = useState(false);
+const [paymentMethod, setPaymentMethod] = useState("Online Payment");
 
   // ------------------------------------------------------------
   // ORDER
@@ -96,14 +108,12 @@ export default function Checkout() {
   // ------------------------------------------------------------
 
   const deliveryCharge = useMemo(() => {
-    return totalAmount > 0 ? 30 : 0;
-  }, [totalAmount]);
+  if (totalAmount <= 0) return 0;
 
-  const taxes = useMemo(() => {
-    return totalAmount > 0
-      ? Math.round(totalAmount * 0.05)
-      : 0;
-  }, [totalAmount]);
+  return totalAmount >= 300 ? 0 : 10;
+}, [totalAmount]);
+
+const taxes = 0;
 
   const grandTotal =
     Number(totalAmount) +
@@ -190,58 +200,162 @@ export default function Checkout() {
   // ------------------------------------------------------------
 
   const handlePaymentChange = (event) => {
-    const method = event.target.value;
+  setPaymentMethod(event.target.value);
+};
 
-    setPaymentMethod(method);
+  // ------------------------------------------------------------
+  // REAL RAZORPAY PAYMENT
+  // ------------------------------------------------------------
 
-    if (method !== "UPI") {
-      setUpiPaid(false);
+  const handleRazorpayPayment = async () => {
+    if (!validateForm()) {
+      showMessage("Please complete all required details.", "error");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
     }
-  };
 
-  const upiPaymentLink =
-    `upi://pay?pa=${encodeURIComponent(
-      UPI_ID
-    )}&pn=${encodeURIComponent(
-      MERCHANT_NAME
-    )}&am=${grandTotal}&cu=INR`;
-
-  const qrCodeUrl =
-    `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=${encodeURIComponent(
-      upiPaymentLink
-    )}`;
-
-  const handleCopyUpi = async () => {
     try {
-      await navigator.clipboard.writeText(UPI_ID);
+      setPlacingOrder(true);
 
-      showMessage(
-        "UPI ID copied successfully.",
-        "success"
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        throw new Error("Razorpay could not be loaded. Please check your internet connection.");
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/payments/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: Number(grandTotal),
+            customerName: form.name.trim(),
+            customerPhone: form.phone.replace(/\D/g, ""),
+          }),
+        }
       );
-    } catch {
-      showMessage(`UPI ID: ${UPI_ID}`, "info");
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to create payment.");
+      }
+
+      const options = {
+        key: data.keyId,
+        amount: data.order.amount,
+        currency: data.order.currency || "INR",
+        name: "Famous Cook",
+        description: "Food Order",
+        order_id: data.order.id,
+        prefill: {
+          name: form.name.trim(),
+          contact: form.phone.replace(/\D/g, ""),
+        },
+        notes: {
+          restaurant: "Famous Cook",
+        },
+        theme: { color: "#2563eb" },
+        handler: async (paymentResponse) => {
+          try {
+            showMessage("Payment successful. Verifying...", "success");
+
+            const verifyResponse = await fetch(
+              "http://localhost:5000/api/payments/verify",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: paymentResponse.razorpay_order_id,
+                  razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                  razorpay_signature: paymentResponse.razorpay_signature,
+                }),
+              }
+            );
+
+            const verifyData = await verifyResponse.json();
+            if (!verifyResponse.ok || !verifyData.success) {
+              throw new Error(verifyData.message || "Payment verification failed.");
+            }
+
+            const orderData = {
+              customerName: form.name.trim(),
+              customerPhone: form.phone.replace(/\D/g, ""),
+              address: form.address.trim(),
+              landmark: form.landmark.trim(),
+              paymentMethod: "Online Payment",
+              items: cart.map((item) => ({
+                name: item.name,
+                type: item.type,
+                price: Number(item.price),
+                qty: Number(item.qty),
+              })),
+              totalAmount: Number(grandTotal),
+              status: "Pending",
+            };
+
+            await orderService.createOrder(orderData);
+
+            const confirmationOrder = {
+              orderNumber: `FC${Date.now().toString().slice(-6)}`,
+              name: form.name.trim(),
+              phone: form.phone.replace(/\D/g, ""),
+              address: form.address.trim(),
+              landmark: form.landmark.trim(),
+              paymentMethod: "Online Payment",
+              paymentStatus: "Paid",
+              paymentId: paymentResponse.razorpay_payment_id,
+              items: cart.map((item) => ({
+                name: item.name,
+                type: item.type,
+                price: Number(item.price),
+                qty: Number(item.qty),
+                image: item.image,
+              })),
+              subtotal: Number(totalAmount),
+              deliveryCharge: Number(deliveryCharge),
+              tax: Number(taxes),
+              total: Number(grandTotal),
+            };
+
+            
+            setCart([]);
+            setDrawerOpen(false);
+            navigate("/order-confirmation", { state: { order: confirmationOrder } });
+          } catch (error) {
+            console.error("Payment verification/order error:", error);
+            setPlacingOrder(false);
+            showMessage(
+              error.message || "Payment was received but order processing failed. Please contact Famous Cook.",
+              "error"
+            );
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setPlacingOrder(false);
+            showMessage("Payment cancelled.", "warning");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on("payment.failed", (response) => {
+        console.error("Payment failed:", response.error);
+        setPlacingOrder(false);
+        showMessage(
+          response.error?.description || "Payment failed. Please try again.",
+          "error"
+        );
+      });
+      razorpay.open();
+    } catch (error) {
+      console.error("Razorpay error:", error);
+      setPlacingOrder(false);
+      showMessage(error.message || "Unable to start payment.", "error");
     }
   };
 
-  const handleOpenUpiApp = () => {
-    window.location.href = upiPaymentLink;
-  };
-
-  const handleUpiPaymentComplete = () => {
-    setUpiPaid(true);
-
-    showMessage(
-      "Payment marked as completed. You can now place the order.",
-      "success"
-    );
-  };
-
-  // ------------------------------------------------------------
-  // PLACE ORDER
-  // ------------------------------------------------------------
-
-  const handlePlaceOrder = async () => {
+const handlePlaceOrder = async () => {
     if (!validateForm()) {
       showMessage(
         "Please complete all required details.",
@@ -256,28 +370,8 @@ export default function Checkout() {
       return;
     }
 
-    if (paymentMethod === "UPI" && !upiPaid) {
-      showMessage(
-        "Please complete the UPI payment and confirm it before placing the order.",
-        "warning"
-      );
-
-      return;
-    }
-
     try {
       setPlacingOrder(true);
-
-      /*
-       * IMPORTANT:
-       * These names match the current Sequelize Order model:
-       *
-       * customerName
-       * customerPhone
-       * items
-       * totalAmount
-       * status
-       */
 
       const orderData = {
     customerName: form.name.trim(),
@@ -301,15 +395,6 @@ export default function Checkout() {
 
     status: "Pending",
 };
-      /*
-       * Keep the complete customer information
-       * for the confirmation page.
-       *
-       * Address and landmark will also be ready
-       * for the backend once those fields are added
-       * to the Order model.
-       */
-
       const confirmationOrder = {
         orderNumber:
           `FC${Date.now().toString().slice(-6)}`,
@@ -345,13 +430,6 @@ export default function Checkout() {
 
         total: Number(grandTotal),
       };
-
-      /*
-       * Save order to backend.
-       *
-       * If backend is temporarily unavailable,
-       * we still show the confirmation screen.
-       */
 
       try {
         await orderService.createOrder(
@@ -905,8 +983,7 @@ export default function Checkout() {
                   sm: 3,
                 },
                 borderRadius: "23px",
-                border:
-                  "1px solid #e2e8f0",
+                border: "1px solid #e2e8f0",
                 boxShadow:
                   "0 12px 35px rgba(15,23,42,.045)",
               }}
@@ -925,8 +1002,7 @@ export default function Checkout() {
                     display: "grid",
                     placeItems: "center",
                     color: "#2563eb",
-                    background:
-                      "#eff6ff",
+                    background: "#eff6ff",
                   }}
                 >
                   <PaymentsOutlinedIcon />
@@ -939,7 +1015,7 @@ export default function Checkout() {
                       fontWeight: 950,
                     }}
                   >
-                    Payment method
+                    Payment Method
                   </Typography>
 
                   <Typography
@@ -948,7 +1024,7 @@ export default function Checkout() {
                       fontSize: 12,
                     }}
                   >
-                    Choose how you'd like to pay.
+                    Choose your preferred way to pay.
                   </Typography>
                 </Box>
               </Stack>
@@ -956,326 +1032,283 @@ export default function Checkout() {
               <FormControl fullWidth>
                 <RadioGroup
                   value={paymentMethod}
-                  onChange={
-                    handlePaymentChange
-                  }
+                  onChange={handlePaymentChange}
                 >
-                  {/* UPI */}
+                  {/* ONLINE PAYMENT */}
 
                   <Paper
                     elevation={0}
                     sx={{
-                      mb: 2,
+                      mb: 1.5,
                       borderRadius: "18px",
                       border:
-                        paymentMethod ===
-                        "UPI"
+                        paymentMethod === "Online Payment"
                           ? "2px solid #2563eb"
                           : "1px solid #e2e8f0",
+                      background:
+                        paymentMethod === "Online Payment"
+                          ? "linear-gradient(135deg,#f8fbff,#eef5ff)"
+                          : "#fff",
                       overflow: "hidden",
+                      transition: "all .2s ease",
                     }}
                   >
                     <FormControlLabel
-                      value="UPI"
-                      control={
-                        <Radio />
-                      }
+                      value="Online Payment"
+                      control={<Radio />}
                       sx={{
                         width: "100%",
                         m: 0,
-                        p: 1.5,
+                        p: 2,
+                        alignItems: "flex-start",
                       }}
                       label={
                         <Stack
                           direction="row"
-                          spacing={1.2}
+                          spacing={1.5}
                           alignItems="center"
+                          sx={{ width: "100%" }}
                         >
-                          <QrCode2Icon
+                          <Box
                             sx={{
-                              color:
-                                "#2563eb",
+                              width: 48,
+                              height: 48,
+                              borderRadius: "14px",
+                              display: "grid",
+                              placeItems: "center",
+                              color: "#2563eb",
+                              background: "#dbeafe",
+                              flexShrink: 0,
                             }}
-                          />
+                          >
+                            <PaymentsOutlinedIcon />
+                          </Box>
 
-                          <Box>
-                            <Typography
-                              fontWeight={900}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="space-between"
+                              gap={1}
                             >
-                              UPI Payment
+                              <Typography
+                                sx={{
+                                  fontSize: 15,
+                                  fontWeight: 950,
+                                  color: "#0f172a",
+                                }}
+                              >
+                                Online Payment
+                              </Typography>
+
+                              <Chip
+                                label="Recommended"
+                                size="small"
+                                sx={{
+                                  height: 24,
+                                  fontSize: 10,
+                                  fontWeight: 900,
+                                  color: "#15803d",
+                                  background: "#dcfce7",
+                                }}
+                              />
+                            </Stack>
+
+                            <Typography
+                              sx={{
+                                mt: 0.3,
+                                fontSize: 12,
+                                color: "#475569",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Pay securely with Razorpay
                             </Typography>
 
                             <Typography
                               sx={{
+                                mt: 0.3,
                                 fontSize: 11,
-                                color:
-                                  "#64748b",
+                                color: "#64748b",
                               }}
                             >
-                              Pay using any UPI app
+                              Cards • Netbanking • Wallets
                             </Typography>
+
+                            <Stack
+                              direction="row"
+                              spacing={2}
+                              alignItems="center"
+                              sx={{ mt: 1.2 }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 950,
+                                  color: "#1a56db",
+                                }}
+                              >
+                                VISA
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 950,
+                                  color: "#111827",
+                                }}
+                              >
+                                ●●
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  fontSize: 11,
+                                  fontWeight: 950,
+                                  color: "#2563eb",
+                                }}
+                              >
+                                RuPay
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 900,
+                                  color: "#64748b",
+                                }}
+                              >
+                                🏦
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 900,
+                                  color: "#16a34a",
+                                }}
+                              >
+                                💳
+                              </Typography>
+                            </Stack>
                           </Box>
                         </Stack>
                       }
                     />
 
-                    {paymentMethod ===
-                      "UPI" && (
-                      <Box
-                        sx={{
-                          p: 2.5,
-                          borderTop:
-                            "1px solid #e2e8f0",
-                        }}
-                      >
-                        <Grid
-                          container
-                          spacing={3}
-                          alignItems="center"
-                        >
-                          <Grid
-                            item
-                            xs={12}
-                            sm={5}
-                          >
-                            <Box
-                              sx={{
-                                p: 1,
-                                border:
-                                  "1px solid #dbeafe",
-                                borderRadius:
-                                  "18px",
-                                textAlign:
-                                  "center",
-                              }}
-                            >
-                              <Box
-                                component="img"
-                                src={
-                                  qrCodeUrl
-                                }
-                                alt="UPI QR"
-                                sx={{
-                                  width: "100%",
-                                  maxWidth: 180,
-                                }}
+                    {paymentMethod === "Online Payment" && (
+                      <Box sx={{ px: 2, pb: 2 }}>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          onClick={handleRazorpayPayment}
+                          disabled={placingOrder}
+                          startIcon={
+                            placingOrder ? null : (
+                              <SecurityOutlinedIcon />
+                            )
+                          }
+                          endIcon={
+                            placingOrder ? (
+                              <CircularProgress
+                                size={18}
+                                sx={{ color: "#fff" }}
                               />
-
-                              <Typography
-                                sx={{
-                                  fontSize: 10,
-                                  color:
-                                    "#64748b",
-                                }}
-                              >
-                                Scan with any UPI app
-                              </Typography>
-                            </Box>
-                          </Grid>
-
-                          <Grid
-                            item
-                            xs={12}
-                            sm={7}
-                          >
-                            <Typography
-                              sx={{
-                                fontSize: 18,
-                                fontWeight: 950,
-                                mb: 1,
-                              }}
-                            >
-                              Scan & Pay
-                            </Typography>
-
-                            <Typography
-                              sx={{
-                                fontSize: 12,
-                                color:
-                                  "#64748b",
-                                mb: 2,
-                              }}
-                            >
-                              Pay the exact amount
-                              shown below.
-                            </Typography>
-
-                            <Paper
-                              elevation={0}
-                              sx={{
-                                p: 1.5,
-                                mb: 1.5,
-                                background:
-                                  "#f8fafc",
-                              }}
-                            >
-                              <Typography
-                                sx={{
-                                  fontSize: 10,
-                                  color:
-                                    "#94a3b8",
-                                }}
-                              >
-                                AMOUNT TO PAY
-                              </Typography>
-
-                              <Typography
-                                sx={{
-                                  fontSize: 25,
-                                  fontWeight: 950,
-                                  color:
-                                    "#1d4ed8",
-                                }}
-                              >
-                                {formatPrice(
-                                  grandTotal
-                                )}
-                              </Typography>
-                            </Paper>
-
-                            <Paper
-                              elevation={0}
-                              sx={{
-                                p: 1.5,
-                                mb: 1.5,
-                              }}
-                            >
-                              <Typography
-                                sx={{
-                                  fontSize: 10,
-                                  color:
-                                    "#94a3b8",
-                                }}
-                              >
-                                UPI ID
-                              </Typography>
-
-                              <Stack
-                                direction="row"
-                                justifyContent="space-between"
-                                alignItems="center"
-                              >
-                                <Typography
-                                  fontWeight={900}
-                                >
-                                  {UPI_ID}
-                                </Typography>
-
-                                <Button
-                                  size="small"
-                                  onClick={
-                                    handleCopyUpi
-                                  }
-                                  startIcon={
-                                    <ContentCopyIcon />
-                                  }
-                                >
-                                  Copy
-                                </Button>
-                              </Stack>
-                            </Paper>
-
-                            <Button
-                              fullWidth
-                              variant="outlined"
-                              startIcon={
-                                <OpenInNewIcon />
-                              }
-                              onClick={
-                                handleOpenUpiApp
-                              }
-                              sx={{
-                                mb: 1,
-                                textTransform:
-                                  "none",
-                                fontWeight: 900,
-                              }}
-                            >
-                              Open UPI App
-                            </Button>
-
-                            {!upiPaid ? (
-                              <Button
-                                fullWidth
-                                variant="contained"
-                                startIcon={
-                                  <CheckCircleIcon />
-                                }
-                                onClick={
-                                  handleUpiPaymentComplete
-                                }
-                                sx={{
-                                  textTransform:
-                                    "none",
-                                  fontWeight: 900,
-                                  background:
-                                    "linear-gradient(135deg,#16a34a,#22c55e)",
-                                }}
-                              >
-                                I've Completed Payment
-                              </Button>
                             ) : (
-                              <Alert
-                                severity="success"
-                              >
-                                Payment confirmed. You
-                                can now place the order.
-                              </Alert>
-                            )}
-                          </Grid>
-                        </Grid>
+                              <ArrowForwardIcon />
+                            )
+                          }
+                          sx={{
+                            minHeight: 56,
+                            borderRadius: "15px",
+                            color: "#fff",
+                            background:
+                              "linear-gradient(135deg,#16a34a,#22c55e)",
+                            boxShadow:
+                              "0 12px 28px rgba(22,163,74,.22)",
+                            textTransform: "none",
+                            fontSize: 14,
+                            fontWeight: 950,
+                            "&:hover": {
+                              background:
+                                "linear-gradient(135deg,#15803d,#16a34a)",
+                              boxShadow:
+                                "0 14px 32px rgba(22,163,74,.28)",
+                            },
+                          }}
+                        >
+                          {placingOrder
+                            ? "Processing Payment..."
+                            : `Pay Securely • ${formatPrice(grandTotal)}`}
+                        </Button>
                       </Box>
                     )}
                   </Paper>
 
-                  {/* COD */}
+                  {/* CASH ON DELIVERY */}
 
                   <Paper
                     elevation={0}
                     sx={{
                       borderRadius: "18px",
                       border:
-                        paymentMethod ===
-                        "Cash on Delivery"
-                          ? "2px solid #2563eb"
+                        paymentMethod === "Cash on Delivery"
+                          ? "2px solid #16a34a"
                           : "1px solid #e2e8f0",
+                      background:
+                        paymentMethod === "Cash on Delivery"
+                          ? "#f8fff9"
+                          : "#fff",
+                      overflow: "hidden",
+                      transition: "all .2s ease",
                     }}
                   >
                     <FormControlLabel
                       value="Cash on Delivery"
-                      control={
-                        <Radio />
-                      }
+                      control={<Radio />}
                       sx={{
                         width: "100%",
                         m: 0,
-                        p: 1.5,
+                        p: 2,
+                        alignItems: "center",
                       }}
                       label={
                         <Stack
                           direction="row"
-                          spacing={1.2}
+                          spacing={1.5}
                           alignItems="center"
                         >
-                          <PaymentsOutlinedIcon
+                          <Box
                             sx={{
-                              color:
-                                "#16a34a",
+                              width: 48,
+                              height: 48,
+                              borderRadius: "14px",
+                              display: "grid",
+                              placeItems: "center",
+                              color: "#16a34a",
+                              background: "#dcfce7",
+                              flexShrink: 0,
                             }}
-                          />
+                          >
+                            <PaymentsOutlinedIcon />
+                          </Box>
 
                           <Box>
                             <Typography
-                              fontWeight={900}
+                              sx={{
+                                fontSize: 15,
+                                fontWeight: 950,
+                                color: "#0f172a",
+                              }}
                             >
                               Cash on Delivery
                             </Typography>
 
                             <Typography
                               sx={{
-                                fontSize: 11,
-                                color:
-                                  "#64748b",
+                                mt: 0.3,
+                                fontSize: 12,
+                                color: "#64748b",
                               }}
                             >
                               Pay when your order arrives
@@ -1285,17 +1318,57 @@ export default function Checkout() {
                       }
                     />
 
-                    {paymentMethod ===
-                      "Cash on Delivery" && (
-                      <Box sx={{ p: 2 }}>
-                        <Alert severity="success">
-                          Pay{" "}
-                          {formatPrice(
-                            grandTotal
-                          )}{" "}
-                          in cash when your food
-                          is delivered.
+                    {paymentMethod === "Cash on Delivery" && (
+                      <Box sx={{ px: 2, pb: 2 }}>
+                        <Alert
+                          severity="success"
+                          sx={{
+                            borderRadius: "14px",
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Pay {formatPrice(grandTotal)} in cash when
+                          your food is delivered.
                         </Alert>
+
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          onClick={handlePlaceOrder}
+                          disabled={placingOrder}
+                          endIcon={
+                            placingOrder ? (
+                              <CircularProgress
+                                size={18}
+                                sx={{ color: "#fff" }}
+                              />
+                            ) : (
+                              <CheckCircleIcon />
+                            )
+                          }
+                          sx={{
+                            mt: 1.5,
+                            minHeight: 56,
+                            borderRadius: "15px",
+                            color: "#fff",
+                            background:
+                              "linear-gradient(135deg,#16a34a,#22c55e)",
+                            boxShadow:
+                              "0 12px 28px rgba(22,163,74,.20)",
+                            textTransform: "none",
+                            fontSize: 14,
+                            fontWeight: 950,
+                            "&:hover": {
+                              background:
+                                "linear-gradient(135deg,#15803d,#16a34a)",
+                            },
+                          }}
+                        >
+                          {placingOrder
+                            ? "Placing Order..."
+                            : `Place Order • ${formatPrice(grandTotal)}`}
+                        </Button>
                       </Box>
                     )}
                   </Paper>
@@ -1306,32 +1379,46 @@ export default function Checkout() {
                 elevation={0}
                 sx={{
                   mt: 2,
-                  p: 1.5,
-                  background:
-                    "#f8fafc",
+                  p: 1.7,
+                  background: "#eff6ff",
                   borderRadius: "14px",
+                  border: "1px solid #dbeafe",
                 }}
               >
                 <Stack
                   direction="row"
-                  spacing={1}
+                  spacing={1.2}
                   alignItems="center"
                 >
                   <SecurityOutlinedIcon
                     sx={{
                       color: "#16a34a",
+                      fontSize: 22,
                     }}
                   />
 
-                  <Typography
-                    sx={{
-                      fontSize: 11,
-                      color: "#64748b",
-                    }}
-                  >
-                    Your payment details are
-                    handled securely.
-                  </Typography>
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        color: "#1e3a8a",
+                      }}
+                    >
+                      Your payments are secure
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: 10.5,
+                        color: "#64748b",
+                        mt: 0.2,
+                      }}
+                    >
+                      Online payments are securely processed by Razorpay.
+                      We do not store your card or UPI details.
+                    </Typography>
+                  </Box>
                 </Stack>
               </Paper>
             </Paper>
@@ -1633,73 +1720,6 @@ export default function Checkout() {
                     </Typography>
                   </Stack>
 
-                  {paymentMethod ===
-                    "UPI" && (
-                    <Alert
-                      severity={
-                        upiPaid
-                          ? "success"
-                          : "warning"
-                      }
-                    >
-                      {upiPaid
-                        ? "UPI payment confirmed."
-                        : "Complete UPI payment before placing your order."}
-                    </Alert>
-                  )}
-
-                  {/* PLACE ORDER */}
-
-                  <Button
-                    fullWidth
-                    onClick={
-                      handlePlaceOrder
-                    }
-                    disabled={
-                      placingOrder
-                    }
-                    endIcon={
-                      placingOrder ? (
-                        <CircularProgress
-                          size={18}
-                          sx={{
-                            color:
-                              "#fff",
-                          }}
-                        />
-                      ) : (
-                        <CheckCircleIcon />
-                      )
-                    }
-                    sx={{
-                      mt: 1,
-                      minHeight: 57,
-                      borderRadius:
-                        "15px",
-                      color: "#fff",
-                      background:
-                        "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-                      boxShadow:
-                        "0 13px 30px rgba(37,99,235,.22)",
-                      textTransform:
-                        "none",
-                      fontSize: 14,
-                      fontWeight: 950,
-                      "&:hover": {
-                        background:
-                          "linear-gradient(135deg,#1e40af,#2563eb)",
-                      },
-                    }}
-                  >
-                    {placingOrder
-                      ? "Placing Order..."
-                      : paymentMethod ===
-                          "UPI" &&
-                        !upiPaid
-                      ? "Complete Payment First"
-                      : "Place Order"}
-                  </Button>
-
                   <Typography
                     sx={{
                       color:
@@ -1859,3 +1879,4 @@ export default function Checkout() {
     </Box>
   );
 }
+

@@ -85,16 +85,17 @@ export default function Header() {
     return `₹${number.toLocaleString("en-IN")}`;
   };
 
+  // Delivery: ₹10 below ₹300, FREE for ₹300 and above.
+  // No taxes are charged.
   const deliveryCharge =
-    totalAmount > 0 ? 30 : 0;
-
-  const taxes =
     totalAmount > 0
-      ? Math.round(totalAmount * 0.05)
+      ? Number(totalAmount) >= 300
+        ? 0
+        : 10
       : 0;
 
   const grandTotal =
-    totalAmount + deliveryCharge + taxes;
+    Number(totalAmount) + deliveryCharge;
 
   /* ================================================================
      SEARCH
@@ -1414,31 +1415,9 @@ export default function Header() {
                       fontWeight: 800,
                     }}
                   >
-                    {formatPrice(
-                      deliveryCharge
-                    )}
-                  </Typography>
-                </Stack>
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    sx={{
-                      color: "#64748b",
-                      fontSize: 13,
-                    }}
-                  >
-                    Taxes
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                    }}
-                  >
-                    {formatPrice(taxes)}
+                    {deliveryCharge === 0
+                      ? "FREE"
+                      : formatPrice(deliveryCharge)}
                   </Typography>
                 </Stack>
 

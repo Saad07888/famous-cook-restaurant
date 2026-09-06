@@ -12,12 +12,10 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Fade,
-  Grid,
   IconButton,
-  InputAdornment,
   Paper,
   Skeleton,
+  InputAdornment,
   Snackbar,
   Stack,
   TextField,
@@ -40,18 +38,10 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import SecurityIcon from "@mui/icons-material/Security";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import RiceBowlIcon from "@mui/icons-material/RiceBowl";
 import LunchDiningIcon from "@mui/icons-material/LunchDining";
-import EmojiFoodBeverageIcon from "@mui/icons-material/EmojiFoodBeverage";
-import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
-import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
-import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
-import InstagramIcon from "@mui/icons-material/Instagram";
 
 import Header from "../components/Header";
 import { menuService } from "../services/api";
@@ -59,35 +49,11 @@ import { useCart } from "../context/CartContext";
 
 /* ==========================================================================
    FALLBACK MENU
-
-   Backend is not required for this Home page to work.
-
-   When the API returns menu records, those records are used.
-   If the backend is unavailable or returns an empty array, this realistic
-   frontend menu is displayed instead.
    ========================================================================== */
 
 const fallbackMenu = [
   {
-    id: "fallback-chilly-dry",
-    name: "Chilly Dry",
-    category: "Starters",
-    priceHalf: 120,
-    priceFull: 220,
-    image:
-      "https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    id: "fallback-schezwan-dry",
-    name: "Schezwan Dry",
-    category: "Starters",
-    priceHalf: 130,
-    priceFull: 230,
-    image:
-      "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    id: "fallback-tandoori-chicken",
+    id: "fallback-tandoori",
     name: "Chicken Tandoori",
     category: "Tandoor",
     priceHalf: 190,
@@ -96,176 +62,88 @@ const fallbackMenu = [
       "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=1200&q=85",
   },
   {
-    id: "fallback-chicken-lahori",
-    name: "Chicken Lahori",
-    category: "Chicken Gravy",
-    priceHalf: 220,
-    priceFull: 390,
+    id: "fallback-dal",
+    name: "Dal Fry",
+    category: "Gravy",
+    priceHalf: 100,
+    priceFull: 180,
     image:
-      "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1200&q=85",
   },
   {
-    id: "fallback-chicken-handi",
-    name: "Chicken Handi",
-    category: "Chicken Gravy",
-    priceHalf: 230,
-    priceFull: 400,
-    image:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    id: "fallback-chicken-biryani",
-    name: "Chicken Biryani",
+    id: "fallback-rice",
+    name: "Veg Fried Rice",
     category: "Rice",
-    priceHalf: 200,
-    priceFull: 200,
+    priceHalf: 90,
+    priceFull: 160,
     image:
-      "https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    id: "fallback-paneer",
+    name: "Paneer Pakoda",
+    category: "Starters",
+    priceHalf: 80,
+    priceFull: 140,
+    image:
+      "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=1200&q=85",
   },
 ];
 
 /* ==========================================================================
-   CATEGORY DATA
+   CATEGORIES
    ========================================================================== */
 
-const homeCategories = [
+const categories = [
   {
-    title: "Starters",
-    subtitle: "Crispy & flavourful",
+    name: "All",
+    icon: <RestaurantMenuIcon />,
+  },
+  {
+    name: "Starters",
     icon: <LunchDiningIcon />,
-    image:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85",
   },
   {
-    title: "Tandoor",
-    subtitle: "Charcoal perfection",
+    name: "Tandoor",
     icon: <LocalDiningIcon />,
-    image:
-      "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=1000&q=85",
   },
   {
-    title: "Rice",
-    subtitle: "Aromatic & delicious",
+    name: "Rice",
     icon: <RiceBowlIcon />,
-    image:
-      "https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85",
   },
   {
-    title: "Chicken Gravy",
-    subtitle: "Rich & authentic",
+    name: "Chicken Gravy",
     icon: <RestaurantIcon />,
-    image:
-      "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=1000&q=85",
   },
 ];
 
 /* ==========================================================================
-   HERO SLIDES
+   REAL RESTAURANT IMAGE
+
+   Temporary remote image is used so the page works immediately.
+   Later we can replace this single URL with the Cloudinary URL of the
+   real Famous Cook restaurant photo.
    ========================================================================== */
 
-const heroSlides = [
-  {
-    eyebrow: "FAMOUS COOK",
-    title: "Flavours worth",
-    highlight: "coming back for.",
-    description:
-      "Authentic Indian flavours, freshly prepared dishes and a dining experience made for memorable moments.",
-    image:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=2000&q=90",
-  },
-  {
-    eyebrow: "AUTHENTIC FLAVOURS",
-    title: "From our kitchen",
-    highlight: "to your table.",
-    description:
-      "Enjoy carefully prepared starters, tandoor favourites, aromatic rice and rich chicken gravies.",
-    image:
-      "https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=2000&q=90",
-  },
-  {
-    eyebrow: "MADE FRESH",
-    title: "Good food.",
-    highlight: "Great moments.",
-    description:
-      "Discover the dishes our customers love, prepared fresh with quality ingredients and attention to flavour.",
-    image:
-      "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=2000&q=90",
-  },
-];
+const restaurantImage =
+  "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=90";
 
 /* ==========================================================================
-   FEATURES
-   ========================================================================== */
-
-const features = [
-  {
-    icon: <DeliveryDiningIcon />,
-    title: "Fast Delivery",
-    description:
-      "Fresh food delivered quickly while keeping the taste intact.",
-  },
-  {
-    icon: <WorkspacePremiumOutlinedIcon />,
-    title: "Premium Quality",
-    description:
-      "Carefully selected ingredients and consistent preparation.",
-  },
-  {
-    icon: <RestaurantIcon />,
-    title: "Expert Kitchen",
-    description:
-      "Classic recipes prepared with attention to flavour and detail.",
-  },
-  {
-    icon: <SecurityIcon />,
-    title: "Hygienic Food",
-    description:
-      "Clean preparation standards from kitchen to your table.",
-  },
-];
-
-/* ==========================================================================
-   REVIEWS
-   ========================================================================== */
-
-const reviews = [
-  {
-    name: "Rahul M.",
-    location: "Navi Mumbai",
-    rating: 5,
-    text:
-      "The chicken biryani was really flavourful and the portion was satisfying. Definitely ordering again.",
-  },
-  {
-    name: "Priya S.",
-    location: "Panvel",
-    rating: 5,
-    text:
-      "Loved the tandoori and chicken gravy. The food felt fresh and the ordering experience was very smooth.",
-  },
-  {
-    name: "Amit P.",
-    location: "Kharghar",
-    rating: 4,
-    text:
-      "Good taste, clean presentation and a very convenient online ordering experience.",
-  },
-];
-
-/* ==========================================================================
-   PREMIUM FOOD CARD
+   FOOD CARD
    ========================================================================== */
 
 function HomeFoodCard({ item, onAdd }) {
   const [loaded, setLoaded] = useState(false);
 
   const halfPrice =
-    item?.priceHalf !== undefined && item?.priceHalf !== null
+    item?.priceHalf !== undefined &&
+    item?.priceHalf !== null
       ? Number(item.priceHalf)
       : null;
 
   const fullPrice =
-    item?.priceFull !== undefined && item?.priceFull !== null
+    item?.priceFull !== undefined &&
+    item?.priceFull !== null
       ? Number(item.priceFull)
       : null;
 
@@ -282,17 +160,19 @@ function HomeFoodCard({ item, onAdd }) {
     <Paper
       elevation={0}
       sx={{
-        height: "100%",
         overflow: "hidden",
-        borderRadius: "25px",
-        background: "#ffffff",
+        height: "100%",
+        borderRadius: {
+          xs: "17px",
+          sm: "22px",
+        },
         border: "1px solid #e2e8f0",
-        transition: "all .35s ease",
-        position: "relative",
+        background: "#ffffff",
+        transition: "transform .25s ease, box-shadow .25s ease",
         "&:hover": {
-          transform: "translateY(-8px)",
-          borderColor: "#bfdbfe",
-          boxShadow: "0 25px 55px rgba(15,23,42,.13)",
+          transform: "translateY(-4px)",
+          boxShadow:
+            "0 18px 40px rgba(15,23,42,.10)",
         },
       }}
     >
@@ -302,8 +182,9 @@ function HomeFoodCard({ item, onAdd }) {
         sx={{
           position: "relative",
           height: {
-            xs: 220,
-            sm: 235,
+            xs: 145,
+            sm: 205,
+            md: 220,
           },
           overflow: "hidden",
           background: "#f1f5f9",
@@ -339,9 +220,9 @@ function HomeFoodCard({ item, onAdd }) {
             objectFit: "cover",
             display: "block",
             opacity: loaded ? 1 : 0,
-            transition: "opacity .3s ease, transform .65s ease",
+            transition: "transform .45s ease",
             "&:hover": {
-              transform: "scale(1.07)",
+              transform: "scale(1.05)",
             },
           }}
         />
@@ -351,8 +232,7 @@ function HomeFoodCard({ item, onAdd }) {
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(180deg,rgba(15,23,42,.03) 25%,rgba(15,23,42,.78) 100%)",
-            pointerEvents: "none",
+              "linear-gradient(180deg,transparent 50%,rgba(0,0,0,.65) 100%)",
           }}
         />
 
@@ -361,7 +241,10 @@ function HomeFoodCard({ item, onAdd }) {
             <LocalFireDepartmentIcon
               sx={{
                 color: "#f97316 !important",
-                fontSize: "17px !important",
+                fontSize: {
+                  xs: "14px !important",
+                  sm: "17px !important",
+                },
               }}
             />
           }
@@ -369,83 +252,92 @@ function HomeFoodCard({ item, onAdd }) {
           size="small"
           sx={{
             position: "absolute",
-            top: 14,
-            left: 14,
-            background: "rgba(255,255,255,.96)",
+            top: {
+              xs: 8,
+              sm: 12,
+            },
+            left: {
+              xs: 8,
+              sm: 12,
+            },
+            height: {
+              xs: 24,
+              sm: 30,
+            },
+            background: "#ffffff",
             color: "#0f172a",
+            fontSize: {
+              xs: 9,
+              sm: 11,
+            },
             fontWeight: 900,
-            backdropFilter: "blur(12px)",
           }}
         />
 
-        <Chip
-          label={item?.category || "Special"}
-          size="small"
+        <Stack
+          direction="row"
+          spacing={0.4}
+          alignItems="center"
           sx={{
             position: "absolute",
-            top: 14,
-            right: 14,
-            background: "rgba(15,23,42,.80)",
-            color: "#ffffff",
-            border: "1px solid rgba(255,255,255,.18)",
-            fontWeight: 700,
-            backdropFilter: "blur(10px)",
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 14,
-            left: 16,
-            right: 16,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            bottom: {
+              xs: 8,
+              sm: 12,
+            },
+            left: {
+              xs: 9,
+              sm: 12,
+            },
           }}
         >
-          <Stack
-            direction="row"
-            spacing={0.6}
-            alignItems="center"
-          >
-            <StarIcon
-              sx={{
-                fontSize: 18,
-                color: "#fbbf24",
-              }}
-            />
+          <StarIcon
+            sx={{
+              color: "#fbbf24",
+              fontSize: {
+                xs: 14,
+                sm: 17,
+              },
+            }}
+          />
 
-            <Typography
-              sx={{
-                color: "#ffffff",
-                fontSize: 12,
-                fontWeight: 800,
-              }}
-            >
-              Customer favourite
-            </Typography>
-          </Stack>
-        </Box>
+          <Typography
+            sx={{
+              color: "#ffffff",
+              fontSize: {
+                xs: 9,
+                sm: 11,
+              },
+              fontWeight: 900,
+            }}
+          >
+            Customer favourite
+          </Typography>
+        </Stack>
       </Box>
 
       {/* CONTENT */}
 
       <Box
         sx={{
-          p: 2.5,
-          minHeight: 195,
-          display: "flex",
-          flexDirection: "column",
+          p: {
+            xs: 1.35,
+            sm: 2,
+          },
         }}
       >
         <Typography
           sx={{
-            fontSize: 20,
-            fontWeight: 950,
             color: "#0f172a",
-            lineHeight: 1.25,
-            mb: 0.8,
+            fontSize: {
+              xs: 15,
+              sm: 19,
+            },
+            fontWeight: 950,
+            lineHeight: 1.2,
+            mb: {
+              xs: 0.5,
+              sm: 0.8,
+            },
           }}
         >
           {item?.name}
@@ -453,35 +345,50 @@ function HomeFoodCard({ item, onAdd }) {
 
         <Typography
           sx={{
-            fontSize: 13,
-            lineHeight: 1.65,
             color: "#64748b",
-            mb: 2,
+            fontSize: {
+              xs: 10.5,
+              sm: 12.5,
+            },
+            lineHeight: 1.5,
+            minHeight: {
+              xs: 32,
+              sm: 38,
+            },
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            mb: {
+              xs: 0.8,
+              sm: 1.2,
+            },
           }}
         >
-          Prepared fresh with carefully selected ingredients
+          Freshly prepared with selected ingredients
           for a rich and satisfying flavour.
         </Typography>
 
-        <Divider sx={{ mb: 1.8 }} />
+        <Divider sx={{ mb: 1 }} />
 
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-end",
-            gap: 2,
-            mb: 2,
+            mb: 1.2,
           }}
         >
           <Box>
             <Typography
               sx={{
-                fontSize: 10,
                 color: "#94a3b8",
+                fontSize: {
+                  xs: 8,
+                  sm: 9,
+                },
                 fontWeight: 900,
                 textTransform: "uppercase",
-                letterSpacing: ".08em",
               }}
             >
               {hasTwoPrices ? "Half" : "Price"}
@@ -489,8 +396,11 @@ function HomeFoodCard({ item, onAdd }) {
 
             <Typography
               sx={{
-                fontSize: 21,
-                color: "#0f172a",
+                color: "#0f766e",
+                fontSize: {
+                  xs: 17,
+                  sm: 20,
+                },
                 fontWeight: 950,
               }}
             >
@@ -502,11 +412,13 @@ function HomeFoodCard({ item, onAdd }) {
             <Box sx={{ textAlign: "right" }}>
               <Typography
                 sx={{
-                  fontSize: 10,
                   color: "#94a3b8",
+                  fontSize: {
+                    xs: 8,
+                    sm: 9,
+                  },
                   fontWeight: 900,
                   textTransform: "uppercase",
-                  letterSpacing: ".08em",
                 }}
               >
                 Full
@@ -514,9 +426,12 @@ function HomeFoodCard({ item, onAdd }) {
 
               <Typography
                 sx={{
-                  fontSize: 15,
-                  color: "#334155",
-                  fontWeight: 800,
+                  color: "#0f172a",
+                  fontSize: {
+                    xs: 13,
+                    sm: 15,
+                  },
+                  fontWeight: 900,
                 }}
               >
                 ₹{fullPrice}
@@ -530,22 +445,26 @@ function HomeFoodCard({ item, onAdd }) {
           onClick={() => onAdd(item)}
           endIcon={<AddIcon />}
           sx={{
-            mt: "auto",
-            minHeight: 49,
-            borderRadius: "14px",
+            minHeight: {
+              xs: 38,
+              sm: 45,
+            },
+            borderRadius: {
+              xs: "10px",
+              sm: "12px",
+            },
             color: "#ffffff",
             background:
-              "linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6)",
+              "linear-gradient(135deg,#0f766e,#0d9488)",
             textTransform: "none",
+            fontSize: {
+              xs: 10,
+              sm: 13,
+            },
             fontWeight: 900,
-            boxShadow: "0 10px 22px rgba(37,99,235,.20)",
-            transition: "all .25s ease",
             "&:hover": {
               background:
-                "linear-gradient(135deg,#1e40af,#1d4ed8,#2563eb)",
-              transform: "translateY(-2px)",
-              boxShadow:
-                "0 14px 28px rgba(37,99,235,.28)",
+                "linear-gradient(135deg,#115e59,#0f766e)",
             },
           }}
         >
@@ -557,7 +476,7 @@ function HomeFoodCard({ item, onAdd }) {
 }
 
 /* ==========================================================================
-   SKELETON
+   FOOD SKELETON
    ========================================================================== */
 
 function FoodSkeleton() {
@@ -566,7 +485,7 @@ function FoodSkeleton() {
       elevation={0}
       sx={{
         overflow: "hidden",
-        borderRadius: "25px",
+        borderRadius: "18px",
         border: "1px solid #e2e8f0",
       }}
     >
@@ -575,28 +494,21 @@ function FoodSkeleton() {
         animation="wave"
         sx={{
           height: {
-            xs: 220,
-            sm: 235,
+            xs: 145,
+            sm: 205,
           },
         }}
       />
 
-      <Box sx={{ p: 2.5 }}>
-        <Skeleton width="65%" height={30} />
-        <Skeleton width="100%" height={22} />
-        <Skeleton
-          width="90%"
-          height={22}
-          sx={{ mb: 2 }}
-        />
-
-        <Skeleton width="40%" height={30} />
-
+      <Box sx={{ p: 1.5 }}>
+        <Skeleton width="70%" height={25} />
+        <Skeleton width="100%" height={18} />
+        <Skeleton width="80%" height={18} />
         <Skeleton
           variant="rounded"
           width="100%"
-          height={49}
-          sx={{ mt: 2 }}
+          height={40}
+          sx={{ mt: 1 }}
         />
       </Box>
     </Paper>
@@ -604,7 +516,7 @@ function FoodSkeleton() {
 }
 
 /* ==========================================================================
-   HOME PAGE
+   HOME
    ========================================================================== */
 
 export default function Home() {
@@ -628,8 +540,6 @@ export default function Home() {
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [menuError, setMenuError] = useState(false);
 
-  const [activeHero, setActiveHero] = useState(0);
-
   const [selectedCategory, setSelectedCategory] =
     useState("All");
 
@@ -643,7 +553,7 @@ export default function Home() {
 
   /* ------------------------------------------------------------------------
      FETCH MENU
-  ------------------------------------------------------------------------ */
+     ------------------------------------------------------------------------ */
 
   useEffect(() => {
     let mounted = true;
@@ -684,29 +594,8 @@ export default function Home() {
   }, []);
 
   /* ------------------------------------------------------------------------
-     HERO AUTO ROTATION
-  ------------------------------------------------------------------------ */
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveHero(
-        (previous) =>
-          (previous + 1) % heroSlides.length
-      );
-    }, 6500);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  /* ------------------------------------------------------------------------
-     ACTIVE HERO
-  ------------------------------------------------------------------------ */
-
-  const activeSlide = heroSlides[activeHero];
-
-  /* ------------------------------------------------------------------------
-     FILTERED ITEMS
-  ------------------------------------------------------------------------ */
+     FILTER
+     ------------------------------------------------------------------------ */
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -714,8 +603,9 @@ export default function Home() {
     return foodItems.filter((item) => {
       const categoryMatch =
         selectedCategory === "All" ||
-        String(item?.category || "").toLowerCase() ===
-          selectedCategory.toLowerCase();
+        String(item?.category || "")
+          .toLowerCase()
+          .includes(selectedCategory.toLowerCase());
 
       const searchMatch =
         !query ||
@@ -730,21 +620,30 @@ export default function Home() {
     });
   }, [
     foodItems,
+    selectedCategory,
+    search,
+  ]);
+
+  /* ------------------------------------------------------------------------
+     POPULAR DISHES
+     ------------------------------------------------------------------------ */
+
+  const popularItems = useMemo(() => {
+    if (search || selectedCategory !== "All") {
+      return filteredItems.slice(0, 6);
+    }
+
+    return foodItems.slice(0, 6);
+  }, [
+    foodItems,
+    filteredItems,
     search,
     selectedCategory,
   ]);
 
   /* ------------------------------------------------------------------------
-     POPULAR ITEMS
-  ------------------------------------------------------------------------ */
-
-  const popularItems = useMemo(() => {
-    return foodItems.slice(0, 4);
-  }, [foodItems]);
-
-  /* ------------------------------------------------------------------------
-     FORMAT PRICE
-  ------------------------------------------------------------------------ */
+     PRICE
+     ------------------------------------------------------------------------ */
 
   const formatPrice = (value) => {
     return `₹${Number(value || 0).toLocaleString(
@@ -753,49 +652,41 @@ export default function Home() {
   };
 
   /* ------------------------------------------------------------------------
-     SCROLL
-  ------------------------------------------------------------------------ */
-
-  const scrollToSection = (id) => {
-    document
-      .getElementById(id)
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-  };
-
-  /* ------------------------------------------------------------------------
-     CATEGORY CLICK
-  ------------------------------------------------------------------------ */
-
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
-
-    setTimeout(() => {
-      scrollToSection("signature-dishes");
-    }, 80);
-  };
-
-  /* ------------------------------------------------------------------------
      ADD TO CART
-  ------------------------------------------------------------------------ */
+     ------------------------------------------------------------------------ */
 
   const handleAddToCart = (item) => {
     handleAddClick(item);
 
     setSnackbar({
       open: true,
-      message: `${item?.name || "Dish"} added to selection.`,
+      message: `${item?.name || "Dish"} selected.`,
       severity: "success",
     });
   };
 
   /* ------------------------------------------------------------------------
-     CLOSE SNACKBAR
-  ------------------------------------------------------------------------ */
+     CATEGORY
+     ------------------------------------------------------------------------ */
 
-  const handleCloseSnackbar = () => {
+  const handleCategory = (category) => {
+    setSelectedCategory(category);
+
+    setTimeout(() => {
+      document
+        .getElementById("popular-dishes")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 80);
+  };
+
+  /* ------------------------------------------------------------------------
+     CLOSE SNACKBAR
+     ------------------------------------------------------------------------ */
+
+  const closeSnackbar = () => {
     setSnackbar((previous) => ({
       ...previous,
       open: false,
@@ -803,75 +694,54 @@ export default function Home() {
   };
 
   /* ------------------------------------------------------------------------
-     RENDER
-  ------------------------------------------------------------------------ */
+     PAGE
+     ------------------------------------------------------------------------ */
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
         background:
-          "linear-gradient(180deg,#ffffff 0%,#f8fafc 40%,#ffffff 100%)",
+          "linear-gradient(180deg,#ffffff 0%,#f8fafc 45%,#ffffff 100%)",
         pb: totalItems > 0 ? 10 : 0,
       }}
     >
-      {/* ====================================================================
+      {/* ================================================================
           HEADER
-      ==================================================================== */}
+      ================================================================ */}
 
       <Header
         totalItems={totalItems}
         onCartClick={() => setDrawerOpen(true)}
       />
 
-      {/* ====================================================================
-          HERO
-      ==================================================================== */}
+      {/* ================================================================
+          RESTAURANT HERO
+      ================================================================ */}
 
       <Box
         sx={{
           position: "relative",
           minHeight: {
-            xs: 690,
-            sm: 690,
-            md: 720,
+            xs: 520,
+            sm: 560,
+            md: 600,
           },
           overflow: "hidden",
-          background: "#020617",
+          background: "#180b0b",
         }}
       >
-        {/* HERO IMAGE */}
-
-        <Fade
-          in
-          key={activeHero}
-          timeout={700}
-        >
-          <Box
-            component="img"
-            src={activeSlide.image}
-            alt="Famous Cook restaurant food"
-            sx={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-              opacity: 0.72,
-              transform: "scale(1.02)",
-            }}
-          />
-        </Fade>
-
-        {/* OVERLAY */}
-
         <Box
+          component="img"
+          src="/famous-cook-restaurant.jpg"
+          alt="Famous Cook Restaurant"
           sx={{
             position: "absolute",
             inset: 0,
-            background:
-              "linear-gradient(90deg,rgba(2,6,23,.96) 0%,rgba(2,6,23,.85) 35%,rgba(2,6,23,.48) 70%,rgba(2,6,23,.70) 100%)",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
           }}
         />
 
@@ -880,23 +750,7 @@ export default function Home() {
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(0deg,rgba(2,6,23,.94) 0%,transparent 35%)",
-          }}
-        />
-
-        {/* DECORATIVE GLOW */}
-
-        <Box
-          sx={{
-            position: "absolute",
-            width: 550,
-            height: 550,
-            borderRadius: "50%",
-            right: -280,
-            top: -230,
-            background:
-              "radial-gradient(circle,rgba(37,99,235,.30),transparent 68%)",
-            pointerEvents: "none",
+              "linear-gradient(90deg,rgba(15,5,5,.95) 0%,rgba(35,8,8,.78) 45%,rgba(20,5,5,.35) 100%)",
           }}
         />
 
@@ -906,1979 +760,83 @@ export default function Home() {
             position: "relative",
             zIndex: 2,
             minHeight: {
-              xs: 690,
-              sm: 690,
-              md: 720,
+              xs: 520,
+              sm: 560,
+              md: 600,
             },
             display: "flex",
             alignItems: "center",
-            pt: {
-              xs: 4,
-              md: 0,
-            },
-            pb: 8,
           }}
         >
-          <Fade
-            in
-            key={`content-${activeHero}`}
-            timeout={650}
-          >
-            <Box
-              sx={{
-                maxWidth: 750,
-              }}
-            >
-              {/* EYEBROW */}
-
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                sx={{ mb: 2.5 }}
-              >
-                <Box
-                  sx={{
-                    width: 42,
-                    height: 2,
-                    background: "#60a5fa",
-                  }}
-                />
-
-                <Typography
-                  sx={{
-                    color: "#93c5fd",
-                    fontSize: 11,
-                    fontWeight: 950,
-                    letterSpacing: ".20em",
-                  }}
-                >
-                  {activeSlide.eyebrow}
-                </Typography>
-              </Stack>
-
-              {/* TITLE */}
-
-              <Typography
-                component="h1"
-                sx={{
-                  color: "#ffffff",
-                  fontSize: {
-                    xs: "3.1rem",
-                    sm: "4.3rem",
-                    md: "5.7rem",
-                  },
-                  lineHeight: 0.96,
-                  fontWeight: 950,
-                  letterSpacing: "-.06em",
-                  mb: 2.5,
-                }}
-              >
-                {activeSlide.title}
-
-                <Box
-                  component="span"
-                  sx={{
-                    display: "block",
-                    color: "#60a5fa",
-                  }}
-                >
-                  {activeSlide.highlight}
-                </Box>
-              </Typography>
-
-              {/* DESCRIPTION */}
-
-              <Typography
-                sx={{
-                  maxWidth: 600,
-                  color: "#cbd5e1",
-                  fontSize: {
-                    xs: 15,
-                    sm: 17,
-                  },
-                  lineHeight: 1.75,
-                  mb: 3.5,
-                }}
-              >
-                {activeSlide.description}
-              </Typography>
-
-              {/* ACTIONS */}
-
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
-                spacing={1.5}
-                sx={{ mb: 4 }}
-              >
-                <Button
-                  onClick={() =>
-                    navigate("/menu")
-                  }
-                  endIcon={<ArrowForwardIcon />}
-                  sx={{
-                    minHeight: 56,
-                    px: 3.2,
-                    borderRadius: "15px",
-                    color: "#ffffff",
-                    background:
-                      "linear-gradient(135deg,#2563eb,#3b82f6)",
-                    textTransform: "none",
-                    fontSize: 15,
-                    fontWeight: 950,
-                    boxShadow:
-                      "0 16px 35px rgba(37,99,235,.30)",
-                    "&:hover": {
-                      background:
-                        "linear-gradient(135deg,#1d4ed8,#2563eb)",
-                      transform:
-                        "translateY(-2px)",
-                    },
-                    transition:
-                      "all .25s ease",
-                  }}
-                >
-                  Explore Full Menu
-                </Button>
-
-                <Button
-                  onClick={() =>
-                    scrollToSection(
-                      "signature-dishes"
-                    )
-                  }
-                  startIcon={<RestaurantMenuIcon />}
-                  sx={{
-                    minHeight: 56,
-                    px: 3,
-                    borderRadius: "15px",
-                    color: "#ffffff",
-                    border:
-                      "1px solid rgba(255,255,255,.20)",
-                    background:
-                      "rgba(255,255,255,.07)",
-                    backdropFilter: "blur(10px)",
-                    textTransform: "none",
-                    fontSize: 15,
-                    fontWeight: 900,
-                    "&:hover": {
-                      background:
-                        "rgba(255,255,255,.12)",
-                    },
-                  }}
-                >
-                  View Signature Dishes
-                </Button>
-              </Stack>
-
-              {/* HERO TRUST */}
-
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
-                spacing={{
-                  xs: 1.5,
-                  sm: 3,
-                }}
-              >
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                >
-                  <VerifiedIcon
-                    sx={{
-                      color: "#60a5fa",
-                      fontSize: 19,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      color: "#cbd5e1",
-                      fontSize: 12,
-                      fontWeight: 700,
-                    }}
-                  >
-                    Freshly prepared
-                  </Typography>
-                </Stack>
-
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                >
-                  <StarIcon
-                    sx={{
-                      color: "#fbbf24",
-                      fontSize: 19,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      color: "#cbd5e1",
-                      fontSize: 12,
-                      fontWeight: 700,
-                    }}
-                  >
-                    Loved by local foodies
-                  </Typography>
-                </Stack>
-
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                >
-                  <DeliveryDiningIcon
-                    sx={{
-                      color: "#60a5fa",
-                      fontSize: 20,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      color: "#cbd5e1",
-                      fontSize: 12,
-                      fontWeight: 700,
-                    }}
-                  >
-                    Delivery available
-                  </Typography>
-                </Stack>
-              </Stack>
-            </Box>
-          </Fade>
-        </Container>
-
-        {/* SLIDER CONTROLS */}
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 32,
-            left: 0,
-            right: 0,
-            zIndex: 3,
-          }}
-        >
-          <Container maxWidth="lg">
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Stack
-                direction="row"
-                spacing={0.8}
-              >
-                {heroSlides.map(
-                  (slide, index) => (
-                    <Box
-                      key={slide.eyebrow}
-                      onClick={() =>
-                        setActiveHero(index)
-                      }
-                      sx={{
-                        width:
-                          index === activeHero
-                            ? 36
-                            : 9,
-                        height: 5,
-                        borderRadius: 10,
-                        cursor: "pointer",
-                        background:
-                          index === activeHero
-                            ? "#60a5fa"
-                            : "rgba(255,255,255,.35)",
-                        transition:
-                          "all .3s ease",
-                      }}
-                    />
-                  )
-                )}
-              </Stack>
-
-              <Stack
-                direction="row"
-                spacing={1}
-              >
-                <IconButton
-                  onClick={() =>
-                    setActiveHero(
-                      (activeHero -
-                        1 +
-                        heroSlides.length) %
-                        heroSlides.length
-                    )
-                  }
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    color: "#fff",
-                    border:
-                      "1px solid rgba(255,255,255,.18)",
-                    background:
-                      "rgba(255,255,255,.06)",
-                    "&:hover": {
-                      background:
-                        "rgba(255,255,255,.12)",
-                    },
-                  }}
-                >
-                  <ArrowBackIcon
-                    sx={{ fontSize: 18 }}
-                  />
-                </IconButton>
-
-                <IconButton
-                  onClick={() =>
-                    setActiveHero(
-                      (activeHero + 1) %
-                        heroSlides.length
-                    )
-                  }
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    color: "#fff",
-                    border:
-                      "1px solid rgba(255,255,255,.18)",
-                    background:
-                      "rgba(255,255,255,.06)",
-                    "&:hover": {
-                      background:
-                        "rgba(255,255,255,.12)",
-                    },
-                  }}
-                >
-                  <ArrowForwardIcon
-                    sx={{ fontSize: 18 }}
-                  />
-                </IconButton>
-              </Stack>
-            </Stack>
-          </Container>
-        </Box>
-      </Box>
-
-      {/* ====================================================================
-          TRUST STATS
-      ==================================================================== */}
-
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 5,
-          mt: {
-            xs: 0,
-            md: -5,
-          },
-          px: 2,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "24px",
-              overflow: "hidden",
-              border: "1px solid #e2e8f0",
-              background:
-                "rgba(255,255,255,.97)",
-              backdropFilter: "blur(16px)",
-              boxShadow:
-                "0 20px 55px rgba(15,23,42,.10)",
-            }}
-          >
-            <Grid container>
-              {[
-                {
-                  icon: <StarIcon />,
-                  value: "4.8/5",
-                  label: "Customer rating",
-                },
-                {
-                  icon: <RestaurantIcon />,
-                  value: "Fresh",
-                  label: "Made to order",
-                },
-                {
-                  icon: <DeliveryDiningIcon />,
-                  value: "30–40",
-                  label: "Min delivery",
-                },
-                {
-                  icon: <VerifiedIcon />,
-                  value: "100%",
-                  label: "Quality focused",
-                },
-              ].map((stat, index) => (
-                <Grid
-                  item
-                  xs={6}
-                  md={3}
-                  key={stat.label}
-                >
-                  <Box
-                    sx={{
-                      p: {
-                        xs: 2,
-                        sm: 2.5,
-                      },
-                      textAlign: "center",
-                      borderRight:
-                        index % 2 === 0
-                          ? {
-                              xs: "1px solid #e2e8f0",
-                              md: "1px solid #e2e8f0",
-                            }
-                          : {
-                              xs: "none",
-                              md: "1px solid #e2e8f0",
-                            },
-                      borderBottom:
-                        index < 2
-                          ? {
-                              xs: "1px solid #e2e8f0",
-                              md: "none",
-                            }
-                          : "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        color: "#2563eb",
-                        mb: 0.5,
-                      }}
-                    >
-                      {stat.icon}
-                    </Box>
-
-                    <Typography
-                      sx={{
-                        color: "#0f172a",
-                        fontSize: 18,
-                        fontWeight: 950,
-                      }}
-                    >
-                      {stat.value}
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        color: "#64748b",
-                        fontSize: 10.5,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {stat.label}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          SEARCH + QUICK ORDER
-      ==================================================================== */}
-
-      <Container
-        maxWidth="lg"
-        sx={{
-          pt: {
-            xs: 5,
-            md: 7,
-          },
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            p: {
-              xs: 2,
-              sm: 2.5,
-            },
-            borderRadius: "22px",
-            border: "1px solid #e2e8f0",
-            background: "#ffffff",
-            boxShadow:
-              "0 12px 35px rgba(15,23,42,.05)",
-          }}
-        >
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-          >
-            <Grid item xs={12} md={8}>
-              <TextField
-                fullWidth
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Search your favourite dish..."
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon
-                        sx={{
-                          color: "#64748b",
-                        }}
-                      />
-                    </InputAdornment>
-                  ),
-                  endAdornment: search ? (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          setSearch("")
-                        }
-                      >
-                        <CloseIcon
-                          sx={{
-                            fontSize: 18,
-                          }}
-                        />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : null,
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "15px",
-                    background: "#f8fafc",
-                  },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Button
-                fullWidth
-                onClick={() =>
-                  navigate("/menu")
-                }
-                endIcon={<ArrowForwardIcon />}
-                sx={{
-                  minHeight: 55,
-                  borderRadius: "15px",
-                  color: "#ffffff",
-                  background:
-                    "linear-gradient(135deg,#020617,#1e3a8a)",
-                  textTransform: "none",
-                  fontWeight: 900,
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg,#0f172a,#1d4ed8)",
-                  },
-                }}
-              >
-                Browse Full Menu
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Container>
-
-      {/* ====================================================================
-          CATEGORIES
-      ==================================================================== */}
-
-      <Box
-        id="categories"
-        sx={{
-          pt: {
-            xs: 7,
-            md: 10,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              sx={{
-                color: "#2563eb",
-                fontSize: 11,
-                fontWeight: 950,
-                textTransform: "uppercase",
-                letterSpacing: ".18em",
-                mb: 1,
-              }}
-            >
-              Explore the menu
-            </Typography>
-
-            <Typography
-              component="h2"
-              sx={{
-                color: "#0f172a",
-                fontSize: {
-                  xs: 30,
-                  sm: 40,
-                },
-                fontWeight: 950,
-                letterSpacing: "-.04em",
-                mb: 1,
-              }}
-            >
-              Something delicious
-              for every craving.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: "#64748b",
-                fontSize: 14,
-                maxWidth: 620,
-                lineHeight: 1.7,
-              }}
-            >
-              Discover the flavours that make Famous
-              Cook a favourite for everyday meals and
-              special occasions.
-            </Typography>
-          </Box>
-
-          <Grid container spacing={2}>
-            {homeCategories.map(
-              (category) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={3}
-                  key={category.title}
-                >
-                  <Paper
-                    elevation={0}
-                    onClick={() =>
-                      handleCategoryClick(
-                        category.title
-                      )
-                    }
-                    sx={{
-                      height: 225,
-                      position: "relative",
-                      overflow: "hidden",
-                      borderRadius: "23px",
-                      cursor: "pointer",
-                      border:
-                        "1px solid rgba(255,255,255,.12)",
-                      background: "#020617",
-                      transition:
-                        "all .35s ease",
-                      "&:hover": {
-                        transform:
-                          "translateY(-6px)",
-                        boxShadow:
-                          "0 25px 50px rgba(15,23,42,.18)",
-                      },
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={category.image}
-                      alt={category.title}
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition:
-                          "transform .6s ease",
-                        "&:hover": {
-                          transform:
-                            "scale(1.08)",
-                        },
-                      }}
-                    />
-
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(180deg,rgba(2,6,23,.10),rgba(2,6,23,.88))",
-                      }}
-                    />
-
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        left: 18,
-                        right: 18,
-                        bottom: 18,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 42,
-                          height: 42,
-                          mb: 1.2,
-                          borderRadius: "13px",
-                          display: "grid",
-                          placeItems: "center",
-                          color: "#fff",
-                          background:
-                            "rgba(37,99,235,.90)",
-                        }}
-                      >
-                        {category.icon}
-                      </Box>
-
-                      <Typography
-                        sx={{
-                          color: "#fff",
-                          fontSize: 19,
-                          fontWeight: 950,
-                        }}
-                      >
-                        {category.title}
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          color: "#cbd5e1",
-                          fontSize: 11,
-                          mt: 0.2,
-                        }}
-                      >
-                        {category.subtitle}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-              )
-            )}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          SIGNATURE DISHES
-      ==================================================================== */}
-
-      <Box
-        id="signature-dishes"
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
           <Box
             sx={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-              alignItems: {
-                xs: "flex-start",
-                md: "flex-end",
+              maxWidth: {
+                xs: "100%",
+                md: 700,
               },
-              gap: 2,
-              mb: 4,
-              flexDirection: {
-                xs: "column",
-                md: "row",
-              },
+              py: 5,
             }}
           >
-            <Box>
-              <Typography
-                sx={{
-                  color: "#2563eb",
-                  fontSize: 11,
-                  fontWeight: 950,
-                  textTransform: "uppercase",
-                  letterSpacing: ".18em",
-                  mb: 1,
-                }}
-              >
-                Chef's selection
-              </Typography>
-
-              <Typography
-                component="h2"
-                sx={{
-                  color: "#0f172a",
-                  fontSize: {
-                    xs: 30,
-                    sm: 40,
-                  },
-                  fontWeight: 950,
-                  letterSpacing: "-.04em",
-                  mb: 1,
-                }}
-              >
-                Signature dishes
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#64748b",
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  maxWidth: 620,
-                }}
-              >
-                A selection of dishes made for
-                customers who know exactly what good
-                food should taste like.
-              </Typography>
-            </Box>
-
-            <Button
-              onClick={() =>
-                navigate("/menu")
-              }
-              endIcon={<ArrowForwardIcon />}
+            <Chip
+              label="VEG • NON VEG"
               sx={{
-                minHeight: 46,
-                px: 2,
-                borderRadius: "13px",
-                color: "#1d4ed8",
-                background: "#eff6ff",
-                textTransform: "none",
-                fontWeight: 900,
-                "&:hover": {
-                  background: "#dbeafe",
-                },
-              }}
-            >
-              See Full Menu
-            </Button>
-          </Box>
-
-          {/* SEARCH RESULT */}
-
-          {search && (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 1.5,
-                mb: 3,
-                borderRadius: "15px",
-                border:
-                  "1px solid #dbeafe",
-                background: "#eff6ff",
-              }}
-            >
-              <Typography
-                sx={{
-                  color: "#1e40af",
-                  fontSize: 12,
-                  fontWeight: 800,
-                }}
-              >
-                Showing results for "{search}"
-                {selectedCategory !==
-                  "All" &&
-                  ` in ${selectedCategory}`}
-              </Typography>
-            </Paper>
-          )}
-
-          {/* LOADING */}
-
-          {loadingMenu ? (
-            <Grid container spacing={2.5}>
-              {[1, 2, 3, 4].map(
-                (item) => (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    key={item}
-                  >
-                    <FoodSkeleton />
-                  </Grid>
-                )
-              )}
-            </Grid>
-          ) : (
-            <>
-              {filteredItems.length > 0 ? (
-                <Grid container spacing={2.5}>
-                  {filteredItems
-                    .slice(0, 8)
-                    .map((item) => (
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        md={3}
-                        key={
-                          item?._id ||
-                          item?.id ||
-                          item?.name
-                        }
-                      >
-                        <HomeFoodCard
-                          item={item}
-                          onAdd={
-                            handleAddToCart
-                          }
-                        />
-                      </Grid>
-                    ))}
-                </Grid>
-              ) : (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 5,
-                    textAlign: "center",
-                    borderRadius: "23px",
-                    border:
-                      "1px solid #e2e8f0",
-                  }}
-                >
-                  <RestaurantMenuIcon
-                    sx={{
-                      fontSize: 50,
-                      color: "#94a3b8",
-                      mb: 1,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      fontSize: 22,
-                      fontWeight: 950,
-                      color: "#0f172a",
-                    }}
-                  >
-                    No dishes found
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      color: "#64748b",
-                      fontSize: 13,
-                      mt: 0.5,
-                      mb: 2,
-                    }}
-                  >
-                    Try another search or explore
-                    the complete menu.
-                  </Typography>
-
-                  <Button
-                    onClick={() => {
-                      setSearch("");
-                      setSelectedCategory(
-                        "All"
-                      );
-                    }}
-                    variant="contained"
-                    sx={{
-                      borderRadius: "13px",
-                      textTransform: "none",
-                      fontWeight: 900,
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                </Paper>
-              )}
-            </>
-          )}
-
-          {/* API FALLBACK NOTICE */}
-
-          {menuError && (
-            <Paper
-              elevation={0}
-              sx={{
-                mt: 2,
-                p: 1.5,
-                borderRadius: "14px",
-                border:
-                  "1px solid #fde68a",
-                background: "#fffbeb",
-              }}
-            >
-              <Typography
-                sx={{
-                  color: "#92400e",
-                  fontSize: 11,
-                  lineHeight: 1.6,
-                }}
-              >
-                Showing the restaurant demo menu
-                while the menu service is unavailable.
-                Your frontend is still fully usable.
-              </Typography>
-            </Paper>
-          )}
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          SPECIAL OFFER
-      ==================================================================== */}
-
-      <Box
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={0}
-            sx={{
-              position: "relative",
-              overflow: "hidden",
-              minHeight: {
-                xs: 370,
-                md: 330,
-              },
-              borderRadius: "30px",
-              background:
-                "linear-gradient(115deg,#020617 0%,#0f172a 50%,#172554 100%)",
-              border:
-                "1px solid rgba(255,255,255,.08)",
-              boxShadow:
-                "0 25px 65px rgba(15,23,42,.16)",
-            }}
-          >
-            <Box
-              component="img"
-              src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1500&q=85"
-              alt="Famous Cook special offer"
-              sx={{
-                position: "absolute",
-                right: 0,
-                top: 0,
-                width: {
-                  xs: "100%",
-                  md: "53%",
-                },
-                height: "100%",
-                objectFit: "cover",
-                opacity: {
-                  xs: 0.22,
-                  md: 0.72,
-                },
-              }}
-            />
-
-            <Box
-              sx={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(90deg,#020617 0%,rgba(2,6,23,.96) 38%,rgba(2,6,23,.50) 75%,rgba(2,6,23,.55) 100%)",
-              }}
-            />
-
-            <Box
-              sx={{
-                position: "relative",
-                zIndex: 2,
-                p: {
-                  xs: 3,
-                  sm: 5,
-                  md: 6,
-                },
-                maxWidth: 700,
-              }}
-            >
-              <Chip
-                icon={
-                  <LocalOfferOutlinedIcon />
-                }
-                label="LIMITED TIME OFFER"
-                sx={{
-                  mb: 2,
-                  color: "#dbeafe",
-                  background:
-                    "rgba(37,99,235,.20)",
-                  border:
-                    "1px solid rgba(96,165,250,.30)",
-                  fontWeight: 900,
-                }}
-              />
-
-              <Typography
-                sx={{
-                  color: "#fff",
-                  fontSize: {
-                    xs: 31,
-                    sm: 44,
-                  },
-                  fontWeight: 950,
-                  lineHeight: 1.05,
-                  letterSpacing: "-.045em",
-                  mb: 1.5,
-                }}
-              >
-                Make your next meal
-                <Box
-                  component="span"
-                  sx={{
-                    display: "block",
-                    color: "#60a5fa",
-                  }}
-                >
-                  extra special.
-                </Box>
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#cbd5e1",
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  maxWidth: 520,
-                  mb: 3,
-                }}
-              >
-                Explore our chef-selected dishes and
-                discover a menu designed around flavour,
-                freshness and satisfying portions.
-              </Typography>
-
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
-                spacing={1.2}
-              >
-                <Button
-                  onClick={() =>
-                    navigate("/menu")
-                  }
-                  endIcon={<ArrowForwardIcon />}
-                  sx={{
-                    minHeight: 52,
-                    px: 2.7,
-                    borderRadius: "14px",
-                    color: "#fff",
-                    background:
-                      "linear-gradient(135deg,#2563eb,#3b82f6)",
-                    textTransform: "none",
-                    fontWeight: 900,
-                    "&:hover": {
-                      background:
-                        "linear-gradient(135deg,#1d4ed8,#2563eb)",
-                    },
-                  }}
-                >
-                  Order Now
-                </Button>
-
-                <Button
-                  onClick={() =>
-                    scrollToSection(
-                      "why-us"
-                    )
-                  }
-                  sx={{
-                    minHeight: 52,
-                    px: 2.5,
-                    borderRadius: "14px",
-                    color: "#fff",
-                    border:
-                      "1px solid rgba(255,255,255,.18)",
-                    background:
-                      "rgba(255,255,255,.05)",
-                    textTransform: "none",
-                    fontWeight: 800,
-                    "&:hover": {
-                      background:
-                        "rgba(255,255,255,.10)",
-                    },
-                  }}
-                >
-                  Why Famous Cook?
-                </Button>
-              </Stack>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          WHY CHOOSE US
-      ==================================================================== */}
-
-      <Box
-        id="why-us"
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid
-            container
-            spacing={{
-              xs: 4,
-              md: 7,
-            }}
-            alignItems="center"
-          >
-            <Grid item xs={12} md={5}>
-              <Typography
-                sx={{
-                  color: "#2563eb",
-                  fontSize: 11,
-                  fontWeight: 950,
-                  textTransform: "uppercase",
-                  letterSpacing: ".18em",
-                  mb: 1,
-                }}
-              >
-                Why Famous Cook
-              </Typography>
-
-              <Typography
-                component="h2"
-                sx={{
-                  color: "#0f172a",
-                  fontSize: {
-                    xs: 30,
-                    sm: 40,
-                  },
-                  fontWeight: 950,
-                  letterSpacing: "-.04em",
-                  lineHeight: 1.08,
-                  mb: 1.5,
-                }}
-              >
-                More than a meal.
-                A complete food
-                experience.
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#64748b",
-                  fontSize: 14,
-                  lineHeight: 1.8,
-                  mb: 2.5,
-                }}
-              >
-                We focus on the details that make a
-                restaurant experience memorable — from
-                ingredient quality to preparation,
-                presentation and delivery.
-              </Typography>
-
-              <Stack spacing={1.3}>
-                {[
-                  "Fresh preparation",
-                  "Carefully selected ingredients",
-                  "Consistent taste",
-                  "Convenient online ordering",
-                ].map((item) => (
-                  <Stack
-                    key={item}
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                  >
-                    <CheckCircleIcon
-                      sx={{
-                        color: "#2563eb",
-                        fontSize: 19,
-                      }}
-                    />
-
-                    <Typography
-                      sx={{
-                        color: "#334155",
-                        fontSize: 13,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {item}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
-            </Grid>
-
-            <Grid item xs={12} md={7}>
-              <Grid container spacing={2}>
-                {features.map(
-                  (feature) => (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      key={feature.title}
-                    >
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          height: "100%",
-                          p: 2.5,
-                          borderRadius: "21px",
-                          border:
-                            "1px solid #e2e8f0",
-                          background: "#fff",
-                          transition:
-                            "all .3s ease",
-                          "&:hover": {
-                            transform:
-                              "translateY(-5px)",
-                            borderColor:
-                              "#bfdbfe",
-                            boxShadow:
-                              "0 18px 40px rgba(15,23,42,.08)",
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 48,
-                            height: 48,
-                            mb: 2,
-                            borderRadius: "15px",
-                            display: "grid",
-                            placeItems: "center",
-                            color: "#2563eb",
-                            background:
-                              "linear-gradient(135deg,#eff6ff,#dbeafe)",
-                          }}
-                        >
-                          {feature.icon}
-                        </Box>
-
-                        <Typography
-                          sx={{
-                            color: "#0f172a",
-                            fontSize: 17,
-                            fontWeight: 950,
-                            mb: 0.7,
-                          }}
-                        >
-                          {feature.title}
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            color: "#64748b",
-                            fontSize: 12.5,
-                            lineHeight: 1.7,
-                          }}
-                        >
-                          {feature.description}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  )
-                )}
-              </Grid>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          RESTAURANT EXPERIENCE
-      ==================================================================== */}
-
-      <Box
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid
-            container
-            spacing={{
-              xs: 3,
-              md: 5,
-            }}
-            alignItems="stretch"
-          >
-            <Grid item xs={12} md={7}>
-              <Box
-                sx={{
-                  height: {
-                    xs: 330,
-                    md: 430,
-                  },
-                  position: "relative",
-                  overflow: "hidden",
-                  borderRadius: "28px",
-                }}
-              >
-                <Box
-                  component="img"
-                  src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90"
-                  alt="Famous Cook restaurant experience"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(180deg,rgba(2,6,23,.05),rgba(2,6,23,.82))",
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    position: "absolute",
-                    left: {
-                      xs: 22,
-                      md: 32,
-                    },
-                    right: {
-                      xs: 22,
-                      md: 32,
-                    },
-                    bottom: {
-                      xs: 22,
-                      md: 30,
-                    },
-                  }}
-                >
-                  <Chip
-                    label="THE FAMOUS COOK EXPERIENCE"
-                    sx={{
-                      mb: 1.5,
-                      color: "#dbeafe",
-                      background:
-                        "rgba(37,99,235,.75)",
-                      fontWeight: 900,
-                      fontSize: 9,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      color: "#fff",
-                      fontSize: {
-                        xs: 25,
-                        md: 35,
-                      },
-                      fontWeight: 950,
-                      letterSpacing: "-.035em",
-                    }}
-                  >
-                    Good food belongs
-                    at good moments.
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      color: "#cbd5e1",
-                      fontSize: 12.5,
-                      lineHeight: 1.7,
-                      mt: 0.8,
-                      maxWidth: 570,
-                    }}
-                  >
-                    Whether you're ordering dinner,
-                    meeting friends or celebrating
-                    something special, Famous Cook is
-                    here to make the moment taste better.
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={5}>
-              <Paper
-                elevation={0}
-                sx={{
-                  height: "100%",
-                  p: {
-                    xs: 3,
-                    md: 4,
-                  },
-                  borderRadius: "28px",
-                  color: "#fff",
-                  background:
-                    "linear-gradient(150deg,#020617,#0f172a 60%,#1e3a8a)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: 230,
-                    height: 230,
-                    borderRadius: "50%",
-                    right: -100,
-                    top: -100,
-                    background:
-                      "rgba(37,99,235,.18)",
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    position: "relative",
-                    zIndex: 1,
-                  }}
-                >
-                  <RestaurantIcon
-                    sx={{
-                      color: "#60a5fa",
-                      fontSize: 40,
-                      mb: 2,
-                    }}
-                  />
-
-                  <Typography
-                    sx={{
-                      fontSize: 29,
-                      fontWeight: 950,
-                      letterSpacing: "-.04em",
-                      mb: 1,
-                    }}
-                  >
-                    Visit us
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 13,
-                      lineHeight: 1.7,
-                      mb: 3,
-                    }}
-                  >
-                    Come experience the Famous Cook
-                    atmosphere and enjoy freshly prepared
-                    food with family and friends.
-                  </Typography>
-
-                  <Stack spacing={2.2}>
-                    <Stack
-                      direction="row"
-                      spacing={1.4}
-                      alignItems="flex-start"
-                    >
-                      <LocationOnIcon
-                        sx={{
-                          color: "#60a5fa",
-                          mt: 0.2,
-                        }}
-                      />
-
-                      <Box>
-                        <Typography
-                          sx={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                          }}
-                        >
-                          Location
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            color: "#94a3b8",
-                            fontSize: 11,
-                            mt: 0.3,
-                          }}
-                        >
-                          Panvel, Navi Mumbai
-                        </Typography>
-                      </Box>
-                    </Stack>
-
-                    <Stack
-                      direction="row"
-                      spacing={1.4}
-                      alignItems="flex-start"
-                    >
-                      <AccessTimeIcon
-                        sx={{
-                          color: "#60a5fa",
-                          mt: 0.2,
-                        }}
-                      />
-
-                      <Box>
-                        <Typography
-                          sx={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                          }}
-                        >
-                          Opening Hours
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            color: "#94a3b8",
-                            fontSize: 11,
-                            mt: 0.3,
-                          }}
-                        >
-                          Daily • 6:00 PM – 11:00 PM
-                        </Typography>
-                      </Box>
-                    </Stack>
-
-                    <Stack
-                      direction="row"
-                      spacing={1.4}
-                      alignItems="flex-start"
-                    >
-                      <PhoneOutlinedIcon
-                        sx={{
-                          color: "#60a5fa",
-                          mt: 0.2,
-                        }}
-                      />
-
-                      <Box>
-                        <Typography
-                          sx={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                          }}
-                        >
-                          Reservations & Orders
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            color: "#94a3b8",
-                            fontSize: 11,
-                            mt: 0.3,
-                          }}
-                        >
-                          Contact the restaurant directly
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Stack>
-
-                  <Button
-                    onClick={() =>
-                      navigate("/menu")
-                    }
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{
-                      mt: 4,
-                      minHeight: 49,
-                      px: 2.4,
-                      borderRadius: "13px",
-                      color: "#fff",
-                      background:
-                        "rgba(37,99,235,.85)",
-                      textTransform: "none",
-                      fontWeight: 900,
-                      "&:hover": {
-                        background:
-                          "rgba(37,99,235,1)",
-                      },
-                    }}
-                  >
-                    Order Online
-                  </Button>
-                </Box>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          REVIEWS
-      ==================================================================== */}
-
-      <Box
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box
-            sx={{
-              textAlign: "center",
-              maxWidth: 700,
-              mx: "auto",
-              mb: 4,
-            }}
-          >
-            <Typography
-              sx={{
-                color: "#2563eb",
-                fontSize: 11,
-                fontWeight: 950,
-                textTransform: "uppercase",
-                letterSpacing: ".18em",
-                mb: 1,
-              }}
-            >
-              Customer love
-            </Typography>
-
-            <Typography
-              component="h2"
-              sx={{
-                color: "#0f172a",
-                fontSize: {
-                  xs: 30,
-                  sm: 40,
-                },
-                fontWeight: 950,
-                letterSpacing: "-.04em",
-                mb: 1,
-              }}
-            >
-              Made for repeat orders.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: "#64748b",
-                fontSize: 14,
-                lineHeight: 1.7,
-              }}
-            >
-              A restaurant is only as good as the people
-              who come back. Here's what our customers
-              have to say.
-            </Typography>
-          </Box>
-
-          <Grid container spacing={2.5}>
-            {reviews.map((review) => (
-              <Grid
-                item
-                xs={12}
-                md={4}
-                key={review.name}
-              >
-                <Paper
-                  elevation={0}
-                  sx={{
-                    height: "100%",
-                    p: 3,
-                    borderRadius: "23px",
-                    border:
-                      "1px solid #e2e8f0",
-                    background: "#fff",
-                    transition:
-                      "all .3s ease",
-                    "&:hover": {
-                      transform:
-                        "translateY(-5px)",
-                      boxShadow:
-                        "0 18px 40px rgba(15,23,42,.08)",
-                    },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={0.4}
-                    sx={{ mb: 2 }}
-                  >
-                    {Array.from({
-                      length: 5,
-                    }).map((_, index) => (
-                      <StarIcon
-                        key={index}
-                        sx={{
-                          fontSize: 18,
-                          color:
-                            index <
-                            review.rating
-                              ? "#fbbf24"
-                              : "#e2e8f0",
-                        }}
-                      />
-                    ))}
-                  </Stack>
-
-                  <Typography
-                    sx={{
-                      color: "#334155",
-                      fontSize: 13.5,
-                      lineHeight: 1.8,
-                      mb: 2.5,
-                    }}
-                  >
-                    “{review.text}”
-                  </Typography>
-
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Stack
-                    direction="row"
-                    spacing={1.2}
-                    alignItems="center"
-                  >
-                    <Box
-                      sx={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: "14px",
-                        display: "grid",
-                        placeItems: "center",
-                        color: "#1d4ed8",
-                        background:
-                          "linear-gradient(135deg,#dbeafe,#eff6ff)",
-                        fontWeight: 950,
-                      }}
-                    >
-                      {review.name.charAt(0)}
-                    </Box>
-
-                    <Box>
-                      <Typography
-                        sx={{
-                          color: "#0f172a",
-                          fontSize: 12,
-                          fontWeight: 950,
-                        }}
-                      >
-                        {review.name}
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          color: "#94a3b8",
-                          fontSize: 10,
-                        }}
-                      >
-                        {review.location}
-                      </Typography>
-                    </Box>
-
-                    <VerifiedIcon
-                      sx={{
-                        ml: "auto",
-                        color: "#2563eb",
-                        fontSize: 18,
-                      }}
-                    />
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ====================================================================
-          FINAL CTA
-      ==================================================================== */}
-
-      <Box
-        sx={{
-          pt: {
-            xs: 8,
-            md: 11,
-          },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={0}
-            sx={{
-              p: {
-                xs: 3,
-                sm: 5,
-                md: 6,
-              },
-              borderRadius: "30px",
-              background:
-                "linear-gradient(135deg,#eff6ff,#ffffff 55%,#dbeafe)",
-              border:
-                "1px solid #bfdbfe",
-              textAlign: "center",
-              boxShadow:
-                "0 20px 55px rgba(37,99,235,.08)",
-            }}
-          >
-            <Box
-              sx={{
-                width: 58,
-                height: 58,
-                mx: "auto",
                 mb: 2,
-                borderRadius: "18px",
-                display: "grid",
-                placeItems: "center",
                 color: "#fff",
                 background:
-                  "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-                boxShadow:
-                  "0 12px 28px rgba(37,99,235,.22)",
+                  "rgba(153,27,27,.88)",
+                border:
+                  "1px solid rgba(255,255,255,.22)",
+                fontWeight: 950,
+                letterSpacing: ".10em",
+                fontSize: {
+                  xs: 9,
+                  sm: 11,
+                },
               }}
-            >
-              <RestaurantMenuIcon />
-            </Box>
+            />
 
             <Typography
+              component="h1"
               sx={{
-                color: "#0f172a",
+                color: "#ffffff",
                 fontSize: {
-                  xs: 29,
-                  sm: 40,
+                  xs: "3rem",
+                  sm: "4.5rem",
+                  md: "5.8rem",
                 },
+                lineHeight: .94,
                 fontWeight: 950,
-                letterSpacing: "-.045em",
-                mb: 1,
+                letterSpacing: "-.06em",
+                mb: 2,
               }}
             >
-              Hungry already?
+              Famous Cook
+              <Box
+                component="span"
+                sx={{
+                  display: "block",
+                  color: "#fca5a5",
+                }}
+              >
+                Restaurant.
+              </Box>
             </Typography>
 
             <Typography
               sx={{
-                color: "#64748b",
-                fontSize: 14,
+                color: "#f1f5f9",
+                fontSize: {
+                  xs: 15,
+                  sm: 18,
+                },
                 lineHeight: 1.7,
-                maxWidth: 600,
-                mx: "auto",
+                maxWidth: 580,
                 mb: 3,
               }}
             >
-              Explore our complete menu, choose your
-              favourite dishes and let Famous Cook take
-              care of the rest.
+              Freshly prepared food, authentic flavours
+              and satisfying portions — made for the
+              people of Panvel.
             </Typography>
 
             <Stack
@@ -2887,516 +845,924 @@ export default function Home() {
                 sm: "row",
               }}
               spacing={1.2}
-              justifyContent="center"
+              sx={{
+                mb: 3,
+              }}
             >
               <Button
+                onClick={() => navigate("/menu")}
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  minHeight: 52,
+                  px: 3,
+                  borderRadius: "13px",
+                  color: "#fff",
+                  background:
+                    "linear-gradient(135deg,#dc2626,#b91c1c)",
+                  textTransform: "none",
+                  fontWeight: 950,
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg,#b91c1c,#991b1b)",
+                  },
+                }}
+              >
+                Order Now
+              </Button>
+
+              <Button
                 onClick={() =>
-                  navigate("/menu")
+                  document
+                    .getElementById("popular-dishes")
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                    })
                 }
                 endIcon={<ArrowForwardIcon />}
                 sx={{
-                  minHeight: 53,
+                  minHeight: 52,
                   px: 3,
-                  borderRadius: "14px",
+                  borderRadius: "13px",
                   color: "#fff",
-                  background:
-                    "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-                  textTransform: "none",
-                  fontWeight: 950,
-                  boxShadow:
-                    "0 12px 28px rgba(37,99,235,.20)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg,#1e40af,#2563eb)",
-                  },
-                }}
-              >
-                Start Your Order
-              </Button>
-
-              <Button
-                onClick={() =>
-                  scrollToSection(
-                    "categories"
-                  )
-                }
-                sx={{
-                  minHeight: 53,
-                  px: 3,
-                  borderRadius: "14px",
-                  color: "#1d4ed8",
-                  background: "#fff",
                   border:
-                    "1px solid #bfdbfe",
+                    "1px solid rgba(255,255,255,.28)",
+                  background:
+                    "rgba(255,255,255,.08)",
                   textTransform: "none",
                   fontWeight: 900,
                   "&:hover": {
-                    background: "#eff6ff",
+                    background:
+                      "rgba(255,255,255,.14)",
                   },
                 }}
               >
-                Explore Categories
+                View Popular Dishes
               </Button>
             </Stack>
-          </Paper>
+
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              gap={2}
+            >
+              <Stack
+                direction="row"
+                spacing={0.7}
+                alignItems="center"
+              >
+                <LocationOnIcon
+                  sx={{
+                    color: "#fca5a5",
+                    fontSize: 18,
+                  }}
+                />
+
+                <Typography
+                  sx={{
+                    color: "#e2e8f0",
+                    fontSize: 12,
+                    fontWeight: 800,
+                  }}
+                >
+                  Panvel, Navi Mumbai
+                </Typography>
+              </Stack>
+
+              <Stack
+                direction="row"
+                spacing={0.7}
+                alignItems="center"
+              >
+                <AccessTimeIcon
+                  sx={{
+                    color: "#fca5a5",
+                    fontSize: 18,
+                  }}
+                />
+
+                <Typography
+                  sx={{
+                    color: "#e2e8f0",
+                    fontSize: 12,
+                    fontWeight: 800,
+                  }}
+                >
+                  Daily • 6 PM – 11 PM
+                </Typography>
+              </Stack>
+            </Stack>
+          </Box>
         </Container>
       </Box>
 
-      {/* ====================================================================
-          FOOTER
-      ==================================================================== */}
+      {/* ================================================================
+          QUICK SEARCH
+      ================================================================ */}
 
-      <Box
-        component="footer"
+      <Container
+        maxWidth="lg"
         sx={{
           mt: {
-            xs: 8,
-            md: 11,
+            xs: -3,
+            sm: -4,
           },
-          color: "#ffffff",
-          background:
-            "linear-gradient(145deg,#020617 0%,#0f172a 55%,#172554 100%)",
+          position: "relative",
+          zIndex: 5,
         }}
       >
-        <Container maxWidth="lg">
+        <Paper
+          elevation={0}
+          sx={{
+            p: {
+              xs: 1.2,
+              sm: 1.5,
+            },
+            borderRadius: "18px",
+            border: "1px solid #e2e8f0",
+            background: "#ffffff",
+            boxShadow:
+              "0 15px 40px rgba(15,23,42,.10)",
+          }}
+        >
+          <TextField
+            fullWidth
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search your favourite dish..."
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon
+                    sx={{
+                      color: "#64748b",
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "13px",
+                background: "#f8fafc",
+              },
+            }}
+          />
+        </Paper>
+      </Container>
+
+      {/* ================================================================
+          CATEGORIES
+      ================================================================ */}
+
+      <Container
+        maxWidth="lg"
+        sx={{
+          pt: {
+            xs: 4,
+            sm: 5,
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            overflowX: "auto",
+            pb: 1,
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}
+        >
+          {categories.map((category) => {
+            const active =
+              selectedCategory === category.name;
+
+            return (
+              <Button
+                key={category.name}
+                onClick={() =>
+                  handleCategory(category.name)
+                }
+                startIcon={category.icon}
+                sx={{
+                  flexShrink: 0,
+                  minHeight: 46,
+                  px: 2,
+                  borderRadius: "13px",
+                  color: active
+                    ? "#ffffff"
+                    : "#334155",
+                  background: active
+                    ? "#111827"
+                    : "#ffffff",
+                  border: active
+                    ? "1px solid #111827"
+                    : "1px solid #e2e8f0",
+                  textTransform: "none",
+                  fontWeight: 900,
+                  "&:hover": {
+                    background: active
+                      ? "#111827"
+                      : "#f8fafc",
+                  },
+                }}
+              >
+                {category.name}
+              </Button>
+            );
+          })}
+        </Stack>
+      </Container>
+
+      {/* ================================================================
+          POPULAR DISHES
+      ================================================================ */}
+
+      <Container
+        id="popular-dishes"
+        maxWidth="lg"
+        sx={{
+          py: {
+            xs: 4,
+            sm: 6,
+          },
+          scrollMarginTop: "80px",
+        }}
+      >
+        <Stack
+          direction={{
+            xs: "column",
+            sm: "row",
+          }}
+          justifyContent="space-between"
+          alignItems={{
+            xs: "flex-start",
+            sm: "flex-end",
+          }}
+          spacing={1}
+          sx={{
+            mb: 2.5,
+          }}
+        >
+          <Box>
+            <Stack
+              direction="row"
+              spacing={0.8}
+              alignItems="center"
+              sx={{ mb: 0.5 }}
+            >
+              <LocalFireDepartmentIcon
+                sx={{
+                  color: "#dc2626",
+                }}
+              />
+
+              <Typography
+                sx={{
+                  color: "#991b1b",
+                  fontSize: 11,
+                  fontWeight: 950,
+                  textTransform: "uppercase",
+                  letterSpacing: ".14em",
+                }}
+              >
+                Customer favourites
+              </Typography>
+            </Stack>
+
+            <Typography
+              component="h2"
+              sx={{
+                color: "#0f172a",
+                fontSize: {
+                  xs: 28,
+                  sm: 38,
+                },
+                fontWeight: 950,
+                letterSpacing: "-.04em",
+              }}
+            >
+              Popular Dishes
+            </Typography>
+
+            <Typography
+              sx={{
+                color: "#64748b",
+                fontSize: 13,
+                mt: 0.5,
+              }}
+            >
+              A few dishes customers love.
+            </Typography>
+          </Box>
+
+          <Button
+            onClick={() => navigate("/menu")}
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              color: "#991b1b",
+              textTransform: "none",
+              fontWeight: 950,
+              px: 0,
+            }}
+          >
+            See Full Menu
+          </Button>
+        </Stack>
+
+        {menuError && (
+          <Alert
+            severity="info"
+            sx={{
+              mb: 2,
+              borderRadius: "13px",
+            }}
+          >
+            Showing available menu items. Full menu
+            service can be used when the server is online.
+          </Alert>
+        )}
+
+        {loadingMenu ? (
           <Box
             sx={{
-              py: {
-                xs: 5,
-                md: 7,
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(2,minmax(0,1fr))",
+                sm: "repeat(2,minmax(0,1fr))",
+                md: "repeat(3,minmax(0,1fr))",
+              },
+              gap: {
+                xs: 1.5,
+                sm: 2,
               },
             }}
           >
-            <Grid
-              container
-              spacing={4}
+            {[1, 2, 3, 4].map((item) => (
+              <FoodSkeleton key={item} />
+            ))}
+          </Box>
+        ) : popularItems.length > 0 ? (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(2,minmax(0,1fr))",
+                sm: "repeat(2,minmax(0,1fr))",
+                md: "repeat(3,minmax(0,1fr))",
+              },
+              gap: {
+                xs: 1.5,
+                sm: 2.5,
+              },
+            }}
+          >
+            {popularItems.map((item) => (
+              <HomeFoodCard
+                key={
+                  item?._id ||
+                  item?.id ||
+                  item?.name
+                }
+                item={item}
+                onAdd={handleAddToCart}
+              />
+            ))}
+          </Box>
+        ) : (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 5,
+              textAlign: "center",
+              borderRadius: "20px",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 900,
+                color: "#0f172a",
+              }}
             >
-              {/* BRAND */}
+              No dishes found
+            </Typography>
 
-              <Grid
-                item
-                xs={12}
-                md={4}
+            <Button
+              onClick={() => {
+                setSearch("");
+                setSelectedCategory("All");
+              }}
+              sx={{
+                mt: 1,
+                textTransform: "none",
+              }}
+            >
+              Clear Search
+            </Button>
+          </Paper>
+        )}
+      </Container>
+
+      {/* ================================================================
+          SIMPLE RESTAURANT INTRO
+      ================================================================ */}
+
+      <Box
+        sx={{
+          background: "#111827",
+          color: "#ffffff",
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: {
+              xs: 5,
+              sm: 7,
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "1.15fr .85fr",
+              },
+              gap: 4,
+              alignItems: "center",
+            }}
+          >
+            <Box>
+              <Typography
+                sx={{
+                  color: "#fca5a5",
+                  fontSize: 11,
+                  fontWeight: 950,
+                  textTransform: "uppercase",
+                  letterSpacing: ".16em",
+                  mb: 1,
+                }}
               >
+                About Famous Cook
+              </Typography>
+
+              <Typography
+                component="h2"
+                sx={{
+                  fontSize: {
+                    xs: 29,
+                    sm: 40,
+                  },
+                  lineHeight: 1.05,
+                  fontWeight: 950,
+                  letterSpacing: "-.04em",
+                  mb: 1.5,
+                }}
+              >
+                Simple food.
+                <br />
+                Proper taste.
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: "#cbd5e1",
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                  maxWidth: 600,
+                  mb: 3,
+                }}
+              >
+                Famous Cook is a local restaurant serving
+                freshly prepared vegetarian and non-vegetarian
+                dishes. From starters and tandoor favourites
+                to rice and rich chicken gravies, our focus is
+                good food and satisfying portions.
+              </Typography>
+
+              <Stack
+                direction="row"
+                flexWrap="wrap"
+                gap={1}
+              >
+                <Chip
+                  icon={<VerifiedIcon />}
+                  label="Fresh preparation"
+                  sx={{
+                    color: "#dcfce7",
+                    background:
+                      "rgba(22,163,74,.15)",
+                    fontWeight: 800,
+                  }}
+                />
+
+                <Chip
+                  icon={<SecurityIcon />}
+                  label="Clean kitchen"
+                  sx={{
+                    color: "#dbeafe",
+                    background:
+                      "rgba(37,99,235,.15)",
+                    fontWeight: 800,
+                  }}
+                />
+              </Stack>
+            </Box>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: {
+                  xs: 2.5,
+                  sm: 3,
+                },
+                borderRadius: "22px",
+                background:
+                  "linear-gradient(145deg,#1f2937,#111827)",
+                border:
+                  "1px solid rgba(255,255,255,.10)",
+              }}
+            >
+              <Stack spacing={2.3}>
                 <Stack
                   direction="row"
                   spacing={1.5}
                   alignItems="center"
-                  sx={{ mb: 2 }}
                 >
                   <Box
                     sx={{
-                      width: 48,
-                      height: 48,
+                      width: 45,
+                      height: 45,
                       borderRadius: "14px",
                       display: "grid",
                       placeItems: "center",
+                      color: "#fca5a5",
                       background:
-                        "linear-gradient(135deg,#2563eb,#3b82f6)",
+                        "rgba(220,38,38,.13)",
                     }}
                   >
-                    <RestaurantMenuIcon />
+                    <LocationOnIcon />
                   </Box>
 
                   <Box>
                     <Typography
                       sx={{
-                        fontSize: 20,
-                        fontWeight: 950,
+                        fontSize: 10,
+                        color: "#94a3b8",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
                       }}
                     >
-                      Famous Cook
+                      Visit Us
                     </Typography>
 
                     <Typography
                       sx={{
-                        color: "#64748b",
-                        fontSize: 10,
+                        fontSize: 14,
+                        fontWeight: 900,
                       }}
                     >
-                      Premium Restaurant
+                      Panvel, Navi Mumbai
                     </Typography>
                   </Box>
                 </Stack>
 
-                <Typography
-                  sx={{
-                    color: "#94a3b8",
-                    fontSize: 12.5,
-                    lineHeight: 1.8,
-                    maxWidth: 360,
-                  }}
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="center"
                 >
-                  Fresh food, authentic flavours and a
-                  premium ordering experience built around
-                  what customers love.
-                </Typography>
+                  <Box
+                    sx={{
+                      width: 45,
+                      height: 45,
+                      borderRadius: "14px",
+                      display: "grid",
+                      placeItems: "center",
+                      color: "#fca5a5",
+                      background:
+                        "rgba(220,38,38,.13)",
+                    }}
+                  >
+                    <AccessTimeIcon />
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: 10,
+                        color: "#94a3b8",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Opening
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: 14,
+                        fontWeight: 900,
+                      }}
+                    >
+                      Daily • 6 PM – 11 PM
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="center"
+                >
+                  <Box
+                    sx={{
+                      width: 45,
+                      height: 45,
+                      borderRadius: "14px",
+                      display: "grid",
+                      placeItems: "center",
+                      color: "#fca5a5",
+                      background:
+                        "rgba(220,38,38,.13)",
+                    }}
+                  >
+                    <DeliveryDiningIcon />
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: 10,
+                        color: "#94a3b8",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Ordering
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: 14,
+                        fontWeight: 900,
+                      }}
+                    >
+                      Online delivery available
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Stack>
+            </Paper>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* ================================================================
+          FINAL CTA
+      ================================================================ */}
+
+      <Container
+        maxWidth="lg"
+        sx={{
+          py: {
+            xs: 5,
+            sm: 7,
+          },
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            p: {
+              xs: 3,
+              sm: 5,
+            },
+            borderRadius: "25px",
+            textAlign: "center",
+            border: "1px solid #fecaca",
+            background:
+              "linear-gradient(135deg,#fff7f7,#ffffff)",
+          }}
+        >
+          <RestaurantIcon
+            sx={{
+              color: "#dc2626",
+              fontSize: 38,
+              mb: 1,
+            }}
+          />
+
+          <Typography
+            sx={{
+              color: "#0f172a",
+              fontSize: {
+                xs: 26,
+                sm: 34,
+              },
+              fontWeight: 950,
+              letterSpacing: "-.04em",
+            }}
+          >
+            Hungry?
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "#64748b",
+              fontSize: 13,
+              mt: 0.5,
+              mb: 2.5,
+            }}
+          >
+            Explore the complete Famous Cook menu and
+            order your favourite dishes.
+          </Typography>
+
+          <Button
+            onClick={() => navigate("/menu")}
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              minHeight: 50,
+              px: 3,
+              borderRadius: "13px",
+              color: "#fff",
+              background:
+                "linear-gradient(135deg,#dc2626,#b91c1c)",
+              textTransform: "none",
+              fontWeight: 950,
+            }}
+          >
+            Explore Full Menu
+          </Button>
+        </Paper>
+      </Container>
+
+      {/* ================================================================
+          FOOTER
+      ================================================================ */}
+
+      <Box
+        sx={{
+          background: "#020617",
+          color: "#ffffff",
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: 5,
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "1fr 1fr",
+              },
+              gap: 4,
+            }}
+          >
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: 22,
+                  fontWeight: 950,
+                }}
+              >
+                Famous Cook
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: "#94a3b8",
+                  fontSize: 12,
+                  mt: 0.5,
+                }}
+              >
+                Premium Restaurant
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: "#64748b",
+                  fontSize: 12,
+                  lineHeight: 1.7,
+                  mt: 1.5,
+                  maxWidth: 400,
+                }}
+              >
+                Fresh food, authentic flavours and a simple
+                online ordering experience.
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  color: "#fca5a5",
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  letterSpacing: ".14em",
+                  mb: 1.2,
+                }}
+              >
+                Contact
+              </Typography>
+
+              <Stack spacing={1}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                >
+                  <LocationOnIcon
+                    sx={{
+                      color: "#f87171",
+                      fontSize: 18,
+                    }}
+                  />
+
+                  <Typography
+                    sx={{
+                      color: "#cbd5e1",
+                      fontSize: 12,
+                    }}
+                  >
+                    Panvel, Navi Mumbai
+                  </Typography>
+                </Stack>
 
                 <Stack
                   direction="row"
                   spacing={1}
-                  sx={{ mt: 2.5 }}
+                  alignItems="center"
                 >
-                  <IconButton
+                  <PhoneOutlinedIcon
                     sx={{
-                      width: 38,
-                      height: 38,
+                      color: "#f87171",
+                      fontSize: 18,
+                    }}
+                  />
+
+                  <Typography
+                    sx={{
                       color: "#cbd5e1",
-                      border:
-                        "1px solid rgba(255,255,255,.10)",
-                      background:
-                        "rgba(255,255,255,.04)",
+                      fontSize: 12,
                     }}
                   >
-                    <InstagramIcon
-                      sx={{ fontSize: 18 }}
-                    />
-                  </IconButton>
-
-                  <IconButton
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      color: "#cbd5e1",
-                      border:
-                        "1px solid rgba(255,255,255,.10)",
-                      background:
-                        "rgba(255,255,255,.04)",
-                    }}
-                  >
-                    <PhoneOutlinedIcon
-                      sx={{ fontSize: 18 }}
-                    />
-                  </IconButton>
-                </Stack>
-              </Grid>
-
-              {/* EXPLORE */}
-
-              <Grid
-                item
-                xs={6}
-                sm={4}
-                md={2}
-              >
-                <Typography
-                  sx={{
-                    fontSize: 13,
-                    fontWeight: 950,
-                    mb: 2,
-                  }}
-                >
-                  Explore
-                </Typography>
-
-                <Stack spacing={1.3}>
-                  <Typography
-                    onClick={() =>
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      })
-                    }
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 12.5,
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: "#fff",
-                      },
-                    }}
-                  >
-                    Home
-                  </Typography>
-
-                  <Typography
-                    onClick={() =>
-                      navigate("/menu")
-                    }
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 12.5,
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: "#fff",
-                      },
-                    }}
-                  >
-                    Menu
-                  </Typography>
-
-                  <Typography
-                    onClick={() =>
-                      scrollToSection(
-                        "signature-dishes"
-                      )
-                    }
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 12.5,
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: "#fff",
-                      },
-                    }}
-                  >
-                    Popular Dishes
-                  </Typography>
-
-                  <Typography
-                    onClick={() =>
-                      scrollToSection(
-                        "why-us"
-                      )
-                    }
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 12.5,
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: "#fff",
-                      },
-                    }}
-                  >
-                    Why Us
+                    Restaurant Contact
                   </Typography>
                 </Stack>
-              </Grid>
-
-              {/* VISIT */}
-
-              <Grid
-                item
-                xs={6}
-                sm={4}
-                md={3}
-              >
-                <Typography
-                  sx={{
-                    fontSize: 13,
-                    fontWeight: 950,
-                    mb: 2,
-                  }}
-                >
-                  Visit
-                </Typography>
-
-                <Stack spacing={1.5}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="flex-start"
-                  >
-                    <LocationOnIcon
-                      sx={{
-                        color: "#60a5fa",
-                        fontSize: 18,
-                      }}
-                    />
-
-                    <Typography
-                      sx={{
-                        color: "#94a3b8",
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Panvel,
-                      <br />
-                      Navi Mumbai
-                    </Typography>
-                  </Stack>
-
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="flex-start"
-                  >
-                    <AccessTimeIcon
-                      sx={{
-                        color: "#60a5fa",
-                        fontSize: 18,
-                      }}
-                    />
-
-                    <Typography
-                      sx={{
-                        color: "#94a3b8",
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Daily
-                      <br />
-                      6 PM – 11 PM
-                    </Typography>
-                  </Stack>
-
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="flex-start"
-                  >
-                    <DeliveryDiningIcon
-                      sx={{
-                        color: "#60a5fa",
-                        fontSize: 18,
-                      }}
-                    />
-
-                    <Typography
-                      sx={{
-                        color: "#94a3b8",
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Delivery
-                      <br />
-                      Available
-                    </Typography>
-                  </Stack>
-                </Stack>
-              </Grid>
-
-              {/* ORDER */}
-
-              <Grid
-                item
-                xs={12}
-                sm={4}
-                md={3}
-              >
-                <Typography
-                  sx={{
-                    fontSize: 13,
-                    fontWeight: 950,
-                    mb: 2,
-                  }}
-                >
-                  Order Online
-                </Typography>
-
-                <Typography
-                  sx={{
-                    color: "#94a3b8",
-                    fontSize: 12.5,
-                    lineHeight: 1.7,
-                    mb: 2,
-                  }}
-                >
-                  Browse the complete menu and order your
-                  favourite dishes from Famous Cook.
-                </Typography>
-
-                <Button
-                  onClick={() =>
-                    navigate("/menu")
-                  }
-                  endIcon={
-                    <ArrowForwardIcon />
-                  }
-                  sx={{
-                    minHeight: 45,
-                    color: "#fff",
-                    background:
-                      "linear-gradient(135deg,#1d4ed8,#2563eb)",
-                    borderRadius: "12px",
-                    px: 2,
-                    textTransform: "none",
-                    fontWeight: 900,
-                    "&:hover": {
-                      background:
-                        "linear-gradient(135deg,#1e40af,#1d4ed8)",
-                    },
-                  }}
-                >
-                  Order Now
-                </Button>
-              </Grid>
-            </Grid>
+              </Stack>
+            </Box>
           </Box>
 
           <Divider
             sx={{
+              my: 3,
               borderColor:
                 "rgba(255,255,255,.08)",
             }}
           />
 
-          <Box
+          <Typography
             sx={{
-              py: 2.5,
-              display: "flex",
-              justifyContent:
-                "space-between",
-              alignItems: "center",
-              gap: 2,
-              flexDirection: {
-                xs: "column",
-                sm: "row",
-              },
+              color: "#64748b",
+              fontSize: 10,
+              textAlign: "center",
             }}
           >
-            <Typography
-              sx={{
-                color: "#64748b",
-                fontSize: 11.5,
-              }}
-            >
-              © {new Date().getFullYear()} Famous
-              Cook. All rights reserved.
-            </Typography>
-
-            <Stack
-              direction="row"
-              spacing={2}
-            >
-              <Typography
-                sx={{
-                  color: "#64748b",
-                  fontSize: 11,
-                }}
-              >
-                Fresh • Quality • Taste
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#64748b",
-                  fontSize: 11,
-                }}
-              >
-                Premium Restaurant
-              </Typography>
-            </Stack>
-          </Box>
+            © {new Date().getFullYear()} Famous Cook.
+            All rights reserved.
+          </Typography>
         </Container>
       </Box>
 
-      {/* ====================================================================
-          PORTION SELECTION DIALOG
-      ==================================================================== */}
+      {/* ================================================================
+          PORTION SELECTION
+      ================================================================ */}
 
       <Dialog
         open={portionOpen}
-        onClose={() =>
-          setPortionOpen(false)
-        }
+        onClose={() => setPortionOpen(false)}
         fullWidth
         maxWidth="xs"
         PaperProps={{
           sx: {
-            borderRadius: "25px",
-            overflow: "hidden",
+            borderRadius: "24px",
           },
         }}
       >
         <DialogTitle
           sx={{
-            px: 3,
-            pt: 3,
-            pb: 1,
             fontWeight: 950,
             color: "#0f172a",
           }}
@@ -3404,19 +1770,14 @@ export default function Home() {
           Choose your portion
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            px: 3,
-            pt: "12px !important",
-          }}
-        >
+        <DialogContent>
           {selectedItem && (
             <>
               <Typography
                 sx={{
                   color: "#64748b",
                   fontSize: 13,
-                  mb: 2.5,
+                  mb: 2,
                 }}
               >
                 Select the portion size for{" "}
@@ -3426,87 +1787,74 @@ export default function Home() {
                 .
               </Typography>
 
-              <Stack spacing={1.3}>
-                <Button
-                  fullWidth
-                  onClick={() =>
-                    addToCart("Half")
-                  }
-                  sx={{
-                    minHeight: 70,
-                    px: 2,
-                    justifyContent:
-                      "space-between",
-                    borderRadius: "17px",
-                    border:
-                      "1px solid #e2e8f0",
-                    color: "#0f172a",
-                    background: "#fff",
-                    textTransform: "none",
-                    "&:hover": {
-                      borderColor:
-                        "#93c5fd",
-                      background:
-                        "#eff6ff",
-                    },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    alignItems="center"
-                  >
-                    <Box
-                      sx={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: "13px",
-                        display: "grid",
-                        placeItems: "center",
-                        color: "#2563eb",
-                        background:
-                          "#eff6ff",
-                      }}
-                    >
-                      <RestaurantMenuIcon />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        textAlign: "left",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontWeight: 900,
-                          fontSize: 14,
-                        }}
-                      >
-                        Half Portion
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          color: "#64748b",
-                          fontSize: 10,
-                        }}
-                      >
-                        Perfect for one
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Typography
+              <Stack spacing={1.2}>
+                {Number(selectedItem.priceHalf) > 0 && (
+                  <Button
+                    fullWidth
+                    onClick={() =>
+                      addToCart("Half")
+                    }
                     sx={{
-                      color: "#1d4ed8",
-                      fontWeight: 950,
+                      minHeight: 68,
+                      justifyContent:
+                        "space-between",
+                      px: 2,
+                      borderRadius: "15px",
+                      border:
+                        "1px solid #e2e8f0",
+                      color: "#0f172a",
+                      background: "#fff",
+                      textTransform: "none",
                     }}
                   >
-                    {formatPrice(
-                      selectedItem.priceHalf
-                    )}
-                  </Typography>
-                </Button>
+                    <Stack
+                      direction="row"
+                      spacing={1.2}
+                      alignItems="center"
+                    >
+                      <RestaurantMenuIcon
+                        sx={{
+                          color: "#0f766e",
+                        }}
+                      />
+
+                      <Box
+                        sx={{
+                          textAlign: "left",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          Half Portion
+                        </Typography>
+
+                        <Typography
+                          sx={{
+                            color: "#64748b",
+                            fontSize: 10,
+                          }}
+                        >
+                          Perfect for one
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Typography
+                      sx={{
+                        color: "#0f766e",
+                        fontWeight: 950,
+                      }}
+                    >
+                      {formatPrice(
+                        selectedItem.priceHalf
+                      )}
+                    </Typography>
+                  </Button>
+                )}
 
                 <Button
                   fullWidth
@@ -3514,44 +1862,29 @@ export default function Home() {
                     addToCart("Full")
                   }
                   sx={{
-                    minHeight: 70,
-                    px: 2,
+                    minHeight: 68,
                     justifyContent:
                       "space-between",
-                    borderRadius: "17px",
+                    px: 2,
+                    borderRadius: "15px",
                     border:
-                      "1px solid #bfdbfe",
+                      "1px solid #fecaca",
                     color: "#0f172a",
                     background:
-                      "linear-gradient(135deg,#eff6ff,#fff)",
+                      "linear-gradient(135deg,#fff7f7,#fff)",
                     textTransform: "none",
-                    "&:hover": {
-                      borderColor:
-                        "#60a5fa",
-                      background:
-                        "#dbeafe",
-                    },
                   }}
                 >
                   <Stack
                     direction="row"
-                    spacing={1.5}
+                    spacing={1.2}
                     alignItems="center"
                   >
-                    <Box
+                    <RestaurantIcon
                       sx={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: "13px",
-                        display: "grid",
-                        placeItems: "center",
-                        color: "#fff",
-                        background:
-                          "linear-gradient(135deg,#1d4ed8,#3b82f6)",
+                        color: "#dc2626",
                       }}
-                    >
-                      <RestaurantIcon />
-                    </Box>
+                    />
 
                     <Box
                       sx={{
@@ -3560,7 +1893,7 @@ export default function Home() {
                     >
                       <Stack
                         direction="row"
-                        spacing={0.7}
+                        spacing={0.6}
                         alignItems="center"
                       >
                         <Typography
@@ -3576,12 +1909,12 @@ export default function Home() {
                           label="Best value"
                           size="small"
                           sx={{
-                            height: 20,
-                            color: "#166534",
-                            background:
-                              "#dcfce7",
+                            height: 18,
                             fontSize: 8,
                             fontWeight: 900,
+                            color: "#991b1b",
+                            background:
+                              "#fee2e2",
                           }}
                         />
                       </Stack>
@@ -3599,7 +1932,7 @@ export default function Home() {
 
                   <Typography
                     sx={{
-                      color: "#1d4ed8",
+                      color: "#dc2626",
                       fontWeight: 950,
                     }}
                   >
@@ -3613,23 +1946,16 @@ export default function Home() {
           )}
         </DialogContent>
 
-        <DialogActions
-          sx={{
-            px: 3,
-            pb: 3,
-          }}
-        >
+        <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button
             fullWidth
             onClick={() =>
               setPortionOpen(false)
             }
             sx={{
-              minHeight: 46,
-              borderRadius: "13px",
-              color: "#64748b",
               textTransform: "none",
               fontWeight: 800,
+              color: "#64748b",
             }}
           >
             Cancel
@@ -3637,22 +1963,20 @@ export default function Home() {
         </DialogActions>
       </Dialog>
 
-      {/* ====================================================================
+      {/* ================================================================
           CART DRAWER
-      ==================================================================== */}
+      ================================================================ */}
 
       <Dialog
         open={drawerOpen}
-        onClose={() =>
-          setDrawerOpen(false)
-        }
+        onClose={() => setDrawerOpen(false)}
         fullWidth
         maxWidth="sm"
         PaperProps={{
           sx: {
             borderRadius: {
-              xs: "25px 25px 0 0",
-              sm: "25px",
+              xs: "24px 24px 0 0",
+              sm: "24px",
             },
             margin: {
               xs: 0,
@@ -3669,15 +1993,7 @@ export default function Home() {
           },
         }}
       >
-        {/* CART HEADER */}
-
-        <DialogTitle
-          sx={{
-            px: 3,
-            pt: 3,
-            pb: 1.5,
-          }}
-        >
+        <DialogTitle>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -3686,9 +2002,9 @@ export default function Home() {
             <Box>
               <Typography
                 sx={{
-                  color: "#0f172a",
                   fontSize: 23,
                   fontWeight: 950,
+                  color: "#0f172a",
                 }}
               >
                 Your Cart
@@ -3698,7 +2014,6 @@ export default function Home() {
                 sx={{
                   color: "#64748b",
                   fontSize: 11,
-                  mt: 0.3,
                 }}
               >
                 {totalItems}{" "}
@@ -3713,23 +2028,13 @@ export default function Home() {
               onClick={() =>
                 setDrawerOpen(false)
               }
-              sx={{
-                border:
-                  "1px solid #e2e8f0",
-                color: "#64748b",
-              }}
             >
               <CloseIcon />
             </IconButton>
           </Stack>
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            px: 3,
-            pt: "10px !important",
-          }}
-        >
+        <DialogContent>
           {cart.length === 0 ? (
             <Box
               sx={{
@@ -3737,45 +2042,21 @@ export default function Home() {
                 textAlign: "center",
               }}
             >
-              <Box
+              <ShoppingBagOutlinedIcon
                 sx={{
-                  width: 80,
-                  height: 80,
-                  mx: "auto",
-                  mb: 2,
-                  borderRadius: "25px",
-                  display: "grid",
-                  placeItems: "center",
-                  color: "#2563eb",
-                  background:
-                    "linear-gradient(135deg,#eff6ff,#dbeafe)",
+                  fontSize: 50,
+                  color: "#94a3b8",
+                  mb: 1,
                 }}
-              >
-                <ShoppingBagOutlinedIcon
-                  sx={{ fontSize: 38 }}
-                />
-              </Box>
+              />
 
               <Typography
                 sx={{
-                  color: "#0f172a",
-                  fontSize: 22,
                   fontWeight: 950,
+                  fontSize: 21,
                 }}
               >
                 Your cart is empty
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#64748b",
-                  fontSize: 13,
-                  mt: 0.7,
-                  mb: 2.5,
-                }}
-              >
-                Add something delicious to get
-                started.
               </Typography>
 
               <Button
@@ -3783,16 +2064,8 @@ export default function Home() {
                   setDrawerOpen(false);
                   navigate("/menu");
                 }}
-                endIcon={
-                  <ArrowForwardIcon />
-                }
                 sx={{
-                  minHeight: 48,
-                  px: 2.5,
-                  borderRadius: "13px",
-                  color: "#fff",
-                  background:
-                    "linear-gradient(135deg,#1d4ed8,#3b82f6)",
+                  mt: 2,
                   textTransform: "none",
                   fontWeight: 900,
                 }}
@@ -3801,185 +2074,129 @@ export default function Home() {
               </Button>
             </Box>
           ) : (
-            <Stack spacing={1.5}>
-              {cart.map(
-                (item, index) => (
-                  <Paper
-                    key={`${item.name}-${item.type}-${index}`}
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: "18px",
-                      border:
-                        "1px solid #e2e8f0",
-                      background: "#fff",
-                    }}
+            <Stack spacing={1.3}>
+              {cart.map((item, index) => (
+                <Paper
+                  key={`${item.name}-${item.type}-${index}`}
+                  elevation={0}
+                  sx={{
+                    p: 1.4,
+                    borderRadius: "16px",
+                    border:
+                      "1px solid #e2e8f0",
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1.2}
+                    alignItems="center"
                   >
+                    <Box
+                      sx={{
+                        width: 54,
+                        height: 54,
+                        flexShrink: 0,
+                        borderRadius: "14px",
+                        display: "grid",
+                        placeItems: "center",
+                        color: "#0f766e",
+                        background:
+                          "#ccfbf1",
+                      }}
+                    >
+                      <RestaurantMenuIcon />
+                    </Box>
+
+                    <Box
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: 14,
+                          fontWeight: 950,
+                          color: "#0f172a",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.name}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          color: "#64748b",
+                          fontSize: 10,
+                          mt: 0.3,
+                        }}
+                      >
+                        {item.type} •{" "}
+                        {formatPrice(item.price)}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          color: "#0f766e",
+                          fontSize: 13,
+                          fontWeight: 950,
+                          mt: 0.5,
+                        }}
+                      >
+                        {formatPrice(
+                          item.price * item.qty
+                        )}
+                      </Typography>
+                    </Box>
+
                     <Stack
                       direction="row"
-                      spacing={1.4}
+                      spacing={0.2}
                       alignItems="center"
+                      sx={{
+                        border:
+                          "1px solid #e2e8f0",
+                        borderRadius: "10px",
+                      }}
                     >
-                      <Box
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          updateQty(index, -1)
+                        }
+                      >
+                        <RemoveIcon
+                          sx={{ fontSize: 16 }}
+                        />
+                      </IconButton>
+
+                      <Typography
                         sx={{
-                          width: 58,
-                          height: 58,
-                          flexShrink: 0,
-                          borderRadius: "16px",
-                          display: "grid",
-                          placeItems: "center",
-                          color: "#2563eb",
-                          background:
-                            "linear-gradient(135deg,#eff6ff,#dbeafe)",
+                          width: 20,
+                          textAlign: "center",
+                          fontSize: 12,
+                          fontWeight: 950,
                         }}
                       >
-                        <RestaurantMenuIcon />
-                      </Box>
+                        {item.qty}
+                      </Typography>
 
-                      <Box
-                        sx={{
-                          flex: 1,
-                          minWidth: 0,
-                        }}
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          updateQty(index, 1)
+                        }
                       >
-                        <Typography
-                          sx={{
-                            color: "#0f172a",
-                            fontSize: 14,
-                            fontWeight: 950,
-                            whiteSpace:
-                              "nowrap",
-                            overflow:
-                              "hidden",
-                            textOverflow:
-                              "ellipsis",
-                          }}
-                        >
-                          {item.name}
-                        </Typography>
-
-                        <Stack
-                          direction="row"
-                          spacing={0.7}
-                          alignItems="center"
-                          sx={{ mt: 0.3 }}
-                        >
-                          <Chip
-                            label={item.type}
-                            size="small"
-                            sx={{
-                              height: 20,
-                              background:
-                                "#f1f5f9",
-                              color:
-                                "#475569",
-                              fontSize: 9,
-                              fontWeight: 900,
-                            }}
-                          />
-
-                          <Typography
-                            sx={{
-                              color:
-                                "#64748b",
-                              fontSize: 10,
-                            }}
-                          >
-                            {formatPrice(
-                              item.price
-                            )}
-                          </Typography>
-                        </Stack>
-
-                        <Typography
-                          sx={{
-                            color: "#1d4ed8",
-                            fontSize: 13,
-                            fontWeight: 950,
-                            mt: 0.7,
-                          }}
-                        >
-                          {formatPrice(
-                            item.price *
-                              item.qty
-                          )}
-                        </Typography>
-                      </Box>
-
-                      <Stack
-                        direction="row"
-                        spacing={0.5}
-                        alignItems="center"
-                        sx={{
-                          border:
-                            "1px solid #e2e8f0",
-                          borderRadius:
-                            "12px",
-                          p: 0.4,
-                        }}
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            updateQty(
-                              index,
-                              -1
-                            )
-                          }
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            color:
-                              "#475569",
-                          }}
-                        >
-                          <RemoveIcon
-                            sx={{
-                              fontSize: 16,
-                            }}
-                          />
-                        </IconButton>
-
-                        <Typography
-                          sx={{
-                            width: 20,
-                            textAlign:
-                              "center",
-                            color:
-                              "#0f172a",
-                            fontSize: 12,
-                            fontWeight: 950,
-                          }}
-                        >
-                          {item.qty}
-                        </Typography>
-
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            updateQty(
-                              index,
-                              1
-                            )
-                          }
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            color:
-                              "#2563eb",
-                          }}
-                        >
-                          <AddIcon
-                            sx={{
-                              fontSize: 16,
-                            }}
-                          />
-                        </IconButton>
-                      </Stack>
+                        <AddIcon
+                          sx={{ fontSize: 16 }}
+                        />
+                      </IconButton>
                     </Stack>
-                  </Paper>
-                )
-              )}
+                  </Stack>
+                </Paper>
+              ))}
             </Stack>
           )}
         </DialogContent>
@@ -3990,7 +2207,6 @@ export default function Home() {
               display: "block",
               px: 3,
               pb: 3,
-              pt: 1,
             }}
           >
             <Divider sx={{ mb: 2 }} />
@@ -4011,14 +2227,10 @@ export default function Home() {
 
                 <Typography
                   sx={{
-                    color: "#334155",
-                    fontSize: 13,
                     fontWeight: 900,
                   }}
                 >
-                  {formatPrice(
-                    totalAmount
-                  )}
+                  {formatPrice(totalAmount)}
                 </Typography>
               </Stack>
 
@@ -4038,7 +2250,6 @@ export default function Home() {
                 <Typography
                   sx={{
                     color: "#16a34a",
-                    fontSize: 12,
                     fontWeight: 900,
                   }}
                 >
@@ -4046,38 +2257,26 @@ export default function Home() {
                 </Typography>
               </Stack>
 
-              <Divider sx={{ my: 0.8 }} />
+              <Divider />
 
               <Stack
                 direction="row"
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Box>
-                  <Typography
-                    sx={{
-                      color: "#0f172a",
-                      fontSize: 17,
-                      fontWeight: 950,
-                    }}
-                  >
-                    Total
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      color: "#94a3b8",
-                      fontSize: 9,
-                    }}
-                  >
-                    Before final checkout
-                  </Typography>
-                </Box>
+                <Typography
+                  sx={{
+                    fontSize: 17,
+                    fontWeight: 950,
+                  }}
+                >
+                  Total
+                </Typography>
 
                 <Typography
                   sx={{
-                    color: "#1d4ed8",
-                    fontSize: 23,
+                    color: "#dc2626",
+                    fontSize: 22,
                     fontWeight: 950,
                   }}
                 >
@@ -4093,25 +2292,16 @@ export default function Home() {
                   setDrawerOpen(false);
                   navigate("/checkout");
                 }}
-                endIcon={
-                  <ArrowForwardIcon />
-                }
+                endIcon={<ArrowForwardIcon />}
                 sx={{
                   mt: 1,
-                  minHeight: 55,
-                  borderRadius: "15px",
-                  color: "#fff",
+                  minHeight: 52,
+                  borderRadius: "13px",
+                  color: "#ffffff",
                   background:
-                    "linear-gradient(135deg,#1d4ed8,#3b82f6)",
+                    "linear-gradient(135deg,#dc2626,#b91c1c)",
                   textTransform: "none",
-                  fontSize: 14,
                   fontWeight: 950,
-                  boxShadow:
-                    "0 12px 28px rgba(37,99,235,.20)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg,#1e40af,#2563eb)",
-                  },
                 }}
               >
                 Continue to Checkout
@@ -4123,10 +2313,8 @@ export default function Home() {
                   setDrawerOpen(false)
                 }
                 sx={{
-                  minHeight: 42,
-                  borderRadius: "12px",
-                  color: "#64748b",
                   textTransform: "none",
+                  color: "#64748b",
                   fontWeight: 800,
                 }}
               >
@@ -4137,26 +2325,24 @@ export default function Home() {
         )}
       </Dialog>
 
-      {/* ====================================================================
+      {/* ================================================================
           MOBILE CART BAR
-      ==================================================================== */}
+      ================================================================ */}
 
       {totalItems > 0 && (
         <Box
           sx={{
             position: "fixed",
             left: {
-              xs: 10,
+              xs: 8,
               sm: 20,
-              md: 30,
             },
             right: {
-              xs: 10,
+              xs: 8,
               sm: 20,
-              md: 30,
             },
             bottom: {
-              xs: 10,
+              xs: 8,
               sm: 18,
             },
             zIndex: 1200,
@@ -4165,17 +2351,16 @@ export default function Home() {
           <Paper
             elevation={0}
             sx={{
-              maxWidth: 900,
+              maxWidth: 850,
               mx: "auto",
-              p: 1,
-              borderRadius: "20px",
-              color: "#fff",
+              p: 0.8,
+              borderRadius: "18px",
               background:
-                "linear-gradient(135deg,#020617,#0f172a 60%,#1e3a8a)",
+                "linear-gradient(135deg,#111827,#1f2937)",
               border:
                 "1px solid rgba(255,255,255,.10)",
               boxShadow:
-                "0 20px 55px rgba(2,6,23,.30)",
+                "0 18px 45px rgba(0,0,0,.28)",
             }}
           >
             <Button
@@ -4184,33 +2369,27 @@ export default function Home() {
                 setDrawerOpen(true)
               }
               sx={{
-                minHeight: 56,
-                px: 1.2,
-                borderRadius: "15px",
-                color: "#fff",
+                minHeight: 54,
                 justifyContent:
                   "space-between",
+                color: "#ffffff",
                 textTransform: "none",
-                "&:hover": {
-                  background:
-                    "rgba(255,255,255,.05)",
-                },
               }}
             >
               <Stack
                 direction="row"
-                spacing={1.2}
+                spacing={1}
                 alignItems="center"
               >
                 <Box
                   sx={{
-                    width: 42,
-                    height: 42,
+                    width: 40,
+                    height: 40,
                     display: "grid",
                     placeItems: "center",
-                    borderRadius: "13px",
+                    borderRadius: "12px",
                     background:
-                      "linear-gradient(135deg,#2563eb,#60a5fa)",
+                      "linear-gradient(135deg,#dc2626,#ef4444)",
                   }}
                 >
                   <ShoppingBagOutlinedIcon />
@@ -4224,7 +2403,7 @@ export default function Home() {
                   <Typography
                     sx={{
                       color: "#94a3b8",
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: 800,
                     }}
                   >
@@ -4233,8 +2412,8 @@ export default function Home() {
 
                   <Typography
                     sx={{
-                      color: "#fff",
-                      fontSize: 13,
+                      color: "#ffffff",
+                      fontSize: 12,
                       fontWeight: 950,
                     }}
                   >
@@ -4243,51 +2422,29 @@ export default function Home() {
                       ? "item"
                       : "items"}{" "}
                     •{" "}
-                    {formatPrice(
-                      totalAmount
-                    )}
+                    {formatPrice(totalAmount)}
                   </Typography>
                 </Box>
               </Stack>
 
-              <Stack
-                direction="row"
-                spacing={0.6}
-                alignItems="center"
-              >
-                <Typography
-                  sx={{
-                    display: {
-                      xs: "none",
-                      sm: "block",
-                    },
-                    color: "#bfdbfe",
-                    fontSize: 11,
-                    fontWeight: 900,
-                  }}
-                >
-                  View Cart
-                </Typography>
-
-                <ArrowForwardIcon
-                  sx={{
-                    fontSize: 18,
-                  }}
-                />
-              </Stack>
+              <ArrowForwardIcon
+                sx={{
+                  fontSize: 19,
+                }}
+              />
             </Button>
           </Paper>
         </Box>
       )}
 
-      {/* ====================================================================
+      {/* ================================================================
           SNACKBAR
-      ==================================================================== */}
+      ================================================================ */}
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={2600}
-        onClose={handleCloseSnackbar}
+        autoHideDuration={2400}
+        onClose={closeSnackbar}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "center",
@@ -4295,12 +2452,10 @@ export default function Home() {
       >
         <Alert
           severity={snackbar.severity}
-          onClose={handleCloseSnackbar}
+          onClose={closeSnackbar}
           sx={{
-            borderRadius: "14px",
+            borderRadius: "13px",
             fontWeight: 800,
-            boxShadow:
-              "0 15px 35px rgba(15,23,42,.16)",
           }}
         >
           {snackbar.message}

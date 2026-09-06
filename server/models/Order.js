@@ -27,6 +27,24 @@ const Order = sequelize.define("Order", {
         allowNull: true,
     },
 
+    paymentStatus: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "Pending",
+    },
+
+    razorpayOrderId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+    },
+
+    razorpayPaymentId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+    },
+
     items: {
         type: DataTypes.JSON,
         allowNull: false,
