@@ -223,8 +223,9 @@ const taxes = 0;
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/payments/create-order",
-        {
+        
+        "/api/payments/create-order",
+{
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -260,8 +261,8 @@ const taxes = 0;
             showMessage("Payment successful. Verifying...", "success");
 
             const verifyResponse = await fetch(
-              "http://localhost:5000/api/payments/verify",
-              {
+             "/api/payments/verify",
+{
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
